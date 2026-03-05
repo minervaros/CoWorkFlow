@@ -25,6 +25,14 @@ def create_app():
     # Iniciamos la base de datos con la app que configuramos
     db.init_app(app)
 
+    # Importamos los modelos para que SQLAlchemy los conozca
+    from app import models
+
+    # Creamos las tablas si no existen
+    with app.app_context():
+        db.create_all()
+
+
     @app.route('/')
     def index():
         return "<h1>¡CoWorkFlow Vivo!</h1><p>Arquitectura profesional con <b>SQLAlchemy ORM</b>.</p>"

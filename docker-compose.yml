@@ -24,6 +24,7 @@ services:
       FLASK_SECRET_KEY: ${FLASK_SECRET_KEY}
     depends_on:
       - db
+    restart: on-failure
 
 volumes:
   db_data:
