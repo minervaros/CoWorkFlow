@@ -1,3 +1,5 @@
 flask
-flask-mysqldb
+Flask-SQLAlchemy
+pymysql
 python-dotenv
+cryptography
