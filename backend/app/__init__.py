@@ -22,6 +22,10 @@ def create_app():
     # Inicializamos la base de datos con la configuración de esta app
     mysql.init_app(app)
 
+    @app.route('/')
+    def index():
+        return "<h1>¡CoWorkFlow Vivo!</h1><p>Estás en la raíz de la API.</p>"
+
     # Una ruta de prueba para verificar la conexión
     @app.route('/api/health')
     def health_check():
