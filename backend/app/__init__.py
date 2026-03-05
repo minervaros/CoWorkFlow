@@ -46,6 +46,10 @@ def create_app():
         except Exception as e:
             return {"status": "error", "message": str(e)}, 500
 
+    # Registramos el Blueprint de autenticación
+    from app.auth import auth_bp
+    app.register_blueprint(auth_bp, url_prefix='/api/auth')
+
     return app
 
 

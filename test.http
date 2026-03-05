@@ -1,0 +1,10 @@
+### Registro de primer usuario Admin
+POST http://localhost:8000/api/auth/register
+Content-Type: application/json
+
+{
+    "full_name": "Admin CoWorkFlow",
+    "email": "admin@test.com",
+    "password": "password123",
+    "role": "admin"
+}
