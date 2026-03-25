@@ -2,6 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 import os
 from dotenv import load_dotenv
+from flask_jwt_extended import JWTManager 
 
 load_dotenv()
 
@@ -10,6 +11,10 @@ db = SQLAlchemy()
 
 def create_app():
     app = Flask(__name__)
+
+    # Configuración de JWT
+    app.config['JWT_SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY') 
+    jwt = JWTManager(app)
 
     # Configuramos la URI de la base de datos usando variables de entorno
     # mysql+pymysql://usuario:password@host/nombre_db
@@ -52,47 +57,3 @@ def create_app():
 
     return app
 
-
-
-
-# from flask import Flask
-# from flask_mysqldb import MySQL
-# import os
-# from dotenv import load_dotenv
-
-# # Cargamos variables de entorno del archivo .env
-# load_dotenv()
-
-# # Inicializamos MySQL
-# mysql = MySQL()
-
-# def create_app():
-#     app = Flask(__name__)
-
-#     # Configuración desde variables de entorno
-#     app.config['MYSQL_HOST'] = 'db'
-#     app.config['MYSQL_USER'] = 'root'
-#     app.config['MYSQL_PASSWORD'] = os.getenv('DB_ROOT_PASSWORD')
-#     app.config['MYSQL_DB'] = os.getenv('DB_NAME')
-#     app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY')
-
-#     # Inicializamos la base de datos con la configuración de esta app
-#     mysql.init_app(app)
-
-#     @app.route('/')
-#     def index():
-#         return "<h1>¡CoWorkFlow Vivo!</h1><p>Estás en la raíz de la API.</p>"
-
-#     # Una ruta de prueba para verificar la conexión
-#     @app.route('/api/health')
-#     def health_check():
-#         try:
-#             # Intentamos una consulta simple a MySQL
-#             cur = mysql.connection.cursor()
-#             cur.execute('SELECT 1')
-#             cur.close()
-#             return {"status": "success", "message": "Conexión con MySQL establecida correctamente"}, 200
-#         except Exception as e:
-#             return {"status": "error", "message": str(e)}, 500
-
-#     return app
