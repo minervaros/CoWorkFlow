@@ -9,8 +9,18 @@ Content-Type: application/json
     "role": "admin"
 }
 
+### Registro de primer usuario normal
+POST http://localhost:8000/api/auth/register
+Content-Type: application/json
 
-### Intento de Login
+{
+    "full_name": "User CoWorkFlow",
+    "email": "user@test.com",
+    "password": "password123",
+    "role": "client"
+}
+
+### Intento de Login con usuario admin
 POST http://localhost:8000/api/auth/login
 Content-Type: application/json
 
@@ -18,3 +28,75 @@ Content-Type: application/json
   "email": "admin@test.com",
   "password": "password123"
 }
+
+### Intento de Login con usuario normal
+POST http://localhost:8000/api/auth/login
+Content-Type: application/json
+
+{
+    "email": "user@test.com",
+    "password": "password123"
+}
+
+### Ver Perfil Protegido (Sustituye TU_TOKEN_AQUI)
+GET http://localhost:8000/api/auth/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3NDYyOTI3NiwianRpIjoiMTc2Yjk2NTQtY2U5OS00ZWU5LTg1NjItMWJmZWI2ZjcwOGU1IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjIiLCJuYmYiOjE3NzQ2MjkyNzYsImNzcmYiOiIzODMwODlkNC01NTdmLTQ5ODQtODRkYi02ZTc0NTA1ZWUyZGUiLCJleHAiOjE3NzQ2MzAxNzYsInJvbGUiOiJjbGllbnQifQ.HvP8RP880JUPFXZ55iOG8vwZdg9mN4ccY2bPbj2HGeA
+
+### Listar usuarios (Solo Admin)
+GET http://localhost:8000/api/auth/admin/users/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3NjcxNDAwNiwianRpIjoiNzQ3ZmU0OTQtMjdkMS00OTkzLThmYjQtYmE2YTA4NWVkNDRkIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjEiLCJuYmYiOjE3NzY3MTQwMDYsImNzcmYiOiI3NWY4M2RjMy1lMGU5LTRlYjktOTNjNi1iNjU3OWYyMDhiNzkiLCJleHAiOjE3NzY3MTQ5MDYsInJvbGUiOiJhZG1pbiJ9.7dqOtEUXBYoKD_B6QqnI5Qqxyxu3ipEjvnagad-vUP0
+
+### Crear una sala nueva (Solo Admin)
+POST http://localhost:8000/api/rooms/
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3NjcxNzkxNywianRpIjoiNDNkYmZkMGUtY2U0YS00MzY5LTkzOTUtYTMzOGJhNGM3ZGMxIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjEiLCJuYmYiOjE3NzY3MTc5MTcsImNzcmYiOiJkMmQ3YTgxOS1mY2U1LTQ4OWQtYWM4MS1mNmE2NzE2OWY0MzYiLCJleHAiOjE3NzY3MTg4MTcsInJvbGUiOiJhZG1pbiJ9.ZMZ-ME5hA8WPMpwtcH3BnDO41zw2c3inlQhPx5cmga4
+
+{
+    "name": "Sala Recreativa",
+    "description": "Sala con juegos y espacio para relajarse",
+    "capacity": 15,
+    "price_per_hour": 20.5
+}
+
+### Listar todas las salas
+GET http://localhost:8000/api/rooms/
+
+### 2. Crear una Reserva 
+# Sustituye el token por el que recibiste en el paso anterior
+# Asegúrate de que "room_id" sea el de una sala existente (ej: 1)
+POST http://localhost:8000/api/bookings/
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3NjcxNzg0MCwianRpIjoiMGRiMDVmMmItMjRiZC00NzU1LWIyM2MtYjI5OGY0MmEzMDJlIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjIiLCJuYmYiOjE3NzY3MTc4NDAsImNzcmYiOiI0MzIzYjU1Mi1lNGY0LTQ0ODEtYTQzNy1jOGJiNWM4MDc4YjkiLCJleHAiOjE3NzY3MTg3NDAsInJvbGUiOiJjbGllbnQifQ.woeYkculuws9Mm8EkHDArZrTJM14cM1BfpUmzZ-LSCU
+
+{
+    "room_id": 2,
+    "start_time": "2026-07-12 11:00:00",
+    "end_time": "2026-07-12 13:00:00"
+}
+
+
+
+### Ver historial de mis reservas
+GET http://localhost:8000/api/bookings/my-bookings
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3NjcxNjg1MiwianRpIjoiZWZjZDU1MTgtZjRlMC00MGM5LTgzOTctYTE4ZGUzNTBmNmVjIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjIiLCJuYmYiOjE3NzY3MTY4NTIsImNzcmYiOiI5YTYxODRhNi00NTQzLTQ5N2ItOTA1Ny1kMWEwZDA3M2YwNWMiLCJleHAiOjE3NzY3MTc3NTIsInJvbGUiOiJjbGllbnQifQ.bglssFGSl3Bx4Dnt8A7LOmX-FPPk-HSUf2Q_vTYBkeM
+
+
+### A. Ver TODAS las reservas (Como Admin - Debe funcionar)
+GET http://localhost:8000/api/bookings/admin/all
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3NjcxNjgyMywianRpIjoiOTQ3ZDgxZDYtOTg4ZC00ZTUyLWIxZTctMjg5YTJjZjUxYTQ4IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjEiLCJuYmYiOjE3NzY3MTY4MjMsImNzcmYiOiI1NDc4OGYyNC1hM2NkLTQ1NTktOTc4ZC1jMmFhY2FiYWRkODQiLCJleHAiOjE3NzY3MTc3MjMsInJvbGUiOiJhZG1pbiJ9.PAJ65S_8YXO-ulEiB7GxKHKpJRrbFW-Bqw9AkM3Cx0o
+
+###
+
+### B. Ver TODAS las reservas (Como Usuario Normal - Debe dar 403)
+GET http://localhost:8000/api/bookings/admin/all
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3NjcxNjg1MiwianRpIjoiZWZjZDU1MTgtZjRlMC00MGM5LTgzOTctYTE4ZGUzNTBmNmVjIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjIiLCJuYmYiOjE3NzY3MTY4NTIsImNzcmYiOiI5YTYxODRhNi00NTQzLTQ5N2ItOTA1Ny1kMWEwZDA3M2YwNWMiLCJleHAiOjE3NzY3MTc3NTIsInJvbGUiOiJjbGllbnQifQ.bglssFGSl3Bx4Dnt8A7LOmX-FPPk-HSUf2Q_vTYBkeM
+
+
+### Cancelar una reserva específica (Sustituye el ID en la URL)
+PATCH http://localhost:8000/api/bookings/1/cancel
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3NjcxNjg1MiwianRpIjoiZWZjZDU1MTgtZjRlMC00MGM5LTgzOTctYTE4ZGUzNTBmNmVjIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjIiLCJuYmYiOjE3NzY3MTY4NTIsImNzcmYiOiI5YTYxODRhNi00NTQzLTQ5N2ItOTA1Ny1kMWEwZDA3M2YwNWMiLCJleHAiOjE3NzY3MTc3NTIsInJvbGUiOiJjbGllbnQifQ.bglssFGSl3Bx4Dnt8A7LOmX-FPPk-HSUf2Q_vTYBkeM
+
+
+
+
+

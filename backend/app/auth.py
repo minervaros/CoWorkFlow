@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from app import db
 from app.models import User
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
 
 # Creamos el Blueprint para autenticación
 auth_bp = Blueprint('auth', __name__)
@@ -65,3 +65,46 @@ def login():
 
     # 4. Si algo falla, error genérico
     return jsonify({"message": "Credenciales incorrectas"}), 401
+
+@auth_bp.route('/profile', methods=['GET'])
+@jwt_required() # <--- Esta es la "aduana". Si no hay token, devuelve 401.
+def get_profile():
+    # Recuperamos el ID que guardamos dentro del token
+    current_user_id = get_jwt_identity()
+    
+    # Buscamos al usuario en la base de datos
+    user = User.query.get(current_user_id)
+    
+    if not user:
+        return jsonify({"message": "Usuario no encontrado"}), 404
+        
+    return jsonify({
+        "id": user.id,
+        "full_name": user.full_name,
+        "email": user.email,
+        "role": user.role,
+        "message": "Acceso concedido al perfil protegido"
+    }), 200
+
+@auth_bp.route('/admin/users/', methods=['GET'])
+@jwt_required()
+def get_all_users():
+    # 1. Extraemos los "claims" adicionales que metimos en el token al hacer login
+    claims = get_jwt()
+    
+    # 2. Verificamos si el rol es 'admin'
+    if claims.get("role") != "admin":
+        return jsonify({"message": "Acceso denegado: Se requieren permisos de administrador"}), 403
+
+    # 3. Si es admin, listamos todos los usuarios
+    users = User.query.all()
+    users_list = []
+    for u in users:
+        users_list.append({
+            "id": u.id,
+            "full_name": u.full_name,
+            "email": u.email,
+            "role": u.role
+        })
+    
+    return jsonify(users_list), 200

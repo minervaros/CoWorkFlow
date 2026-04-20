@@ -55,5 +55,14 @@ def create_app():
     from app.auth import auth_bp
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
 
+    # Registramos el Blueprint de salas
+    from app.rooms import rooms_bp
+    app.register_blueprint(rooms_bp, url_prefix='/api/rooms')
+
+    # Registramos el Blueprint de reservas
+    from app.bookings import bookings_bp
+    app.register_blueprint(bookings_bp, url_prefix='/api/bookings')
+
+
     return app
 
