@@ -53,6 +53,37 @@ export default {
 </script>
 
 <style lang="scss">
+
+/* --- FUENTES DE ESTUDIO DE DISEÑO --- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background-color: #fcfaf7; /* Fondo hueso/crema idéntico a la imagen */
+  color: #2b1b17; /* Marrón oscuro casi negro para los textos, mucho más cálido */
+  font-family: 'Inter', sans-serif;
+}
+
+/* --- TARJETAS ESTILO GALERÍA DE ARTE --- */
+.tarjeta-sala, .stat-card, .dashboard-visual, .tabla-contenedor {
+  background: #ffffff !important;
+  border: 1px solid #eaddd3 !important; /* Borde sutil color arena */
+  border-radius: 0px !important; /* Acabado recto y minimalista, o muy ligeramente redondeado (max 4px) */
+  box-shadow: 0 4px 20px rgba(43, 27, 23, 0.02) !important; /* Sombra ultra ligera */
+  transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+
+.tarjeta-sala:hover {
+  transform: translateY(-4px);
+  border-color: #bfa38f !important; /* El borde se oscurece al pasar el ratón */
+}
+
 // Estilos básicos para que el menú se vea profesional
 .navbar {
   display: flex;

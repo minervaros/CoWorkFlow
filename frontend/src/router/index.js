@@ -1,12 +1,16 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 
 const routes = [
   {
     path: '/',
-    name: 'home',
-    component: HomeView
+    name: 'landing',
+    component: () => import('../views/LandingView.vue') // <-- Tu nueva portada estilo Torik
+  },
+  {
+    path: '/salas',
+    name: 'catalogo',
+    component: () => import('../views/HomeView.vue') // <-- Tu antigua Home con el buscador y las tarjetas
   },
   {
     path: '/login',

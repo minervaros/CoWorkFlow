@@ -22,7 +22,8 @@ def get_rooms():
         "description": r.description,
         "capacity": r.capacity,
         "price_per_hour": r.price_per_hour,
-        "is_active": r.is_active
+        "is_active": r.is_active,
+        "image_url": r.image_url
     } for r in rooms]), 200
 
 # --- RUTA: CREAR SALA (Solo Admins) ---
@@ -38,7 +39,8 @@ def create_room():
         name=data['name'],
         description=data.get('description', ''),
         capacity=data['capacity'],
-        price_per_hour=data['price_per_hour']
+        price_per_hour=data['price_per_hour'],
+        image_url=data.get('image_url', '')
     )
     
     db.session.add(new_room)

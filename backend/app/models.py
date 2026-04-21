@@ -31,6 +31,7 @@ class Room(db.Model):
     capacity = db.Column(db.Integer, nullable=False)
     price_per_hour = db.Column(db.Float, nullable=False)
     is_active = db.Column(db.Boolean, default=True)
+    image_url = db.Column(db.String(500), nullable=True)
 
     def __repr__(self):
         return f'<Room {self.name}>'

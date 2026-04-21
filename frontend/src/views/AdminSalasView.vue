@@ -46,6 +46,11 @@
           <input v-model.number="form.price_per_hour" type="number" step="0.01" placeholder="Precio por hora" required />
           <textarea v-model="form.description" placeholder="Descripción de la sala"></textarea>
           
+          <div class="grupo-form">
+            <label>🔗 URL de la Imagen:</label>
+            <input v-model="form.image_url" type="text" placeholder="Pegue el enlace de la foto (Unsplash, Pexels...)" />
+          </div>
+
           <div class="modal-btns">
             <button type="button" @click="mostrarModal = false">Cancelar</button>
             <button type="submit" class="btn-save">Guardar Cambios</button>
@@ -65,7 +70,15 @@ export default {
       salas: [],
       mostrarModal: false,
       editando: false,
-      form: { id: null, name: '', capacity: null, price_per_hour: null, description: '' }
+      form: { id: null, name: '', capacity: null, price_per_hour: null, description: '' },
+
+      nuevaSala: {
+        name: '',
+        description: '',
+        capacity: 0,
+        price_per_hour: 0,
+        image_url: '' // <--- AÑADE ESTA LÍNEA AQUÍ
+      }
     };
   },
   async created() {
@@ -73,10 +86,16 @@ export default {
   },
   methods: {
     async cargarSalas() {
-      const res = await axios.get('http://localhost:8000/api/rooms/', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('user-token')}` }
-      });
-      this.salas = res.data;
+      const token = localStorage.getItem('user-token');
+      try {
+        // Forzamos al backend a que NO filtre por activas
+        const res = await axios.get('http://localhost:8000/api/rooms/?active_only=false', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        this.salas = res.data;
+      } catch (e) {
+        console.error("Error al cargar salas en admin", e);
+      }
     },
     abrirModalCrear() {
       this.editando = false;
