@@ -20,12 +20,18 @@ def create_booking():
     room = Room.query.get(room_id)
     if not room:
         return jsonify({"message": "La sala no existe"}), 404
+    
+    if not room.is_active:
+        return jsonify({"message": "La sala no está disponible actualmente"}), 400
 
     try:
         start = datetime.strptime(start_str, '%Y-%m-%d %H:%M:%S')
         end = datetime.strptime(end_str, '%Y-%m-%d %H:%M:%S')
     except:
         return jsonify({"message": "Formato de fecha inválido"}), 400
+    
+    if start < datetime.now():
+        return jsonify({"message": "No puedes realizar una reserva en una fecha pasada"}), 400
 
     if (end - start).total_seconds() <= 0:
         return jsonify({"message": "La hora de fin debe ser posterior a la de inicio"}), 400

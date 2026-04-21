@@ -51,7 +51,7 @@ export default {
           token: respuesta.data.access_token,
           user: {
             email: this.email,
-            role: respuesta.data.role // Si tu backend lo devuelve
+            role: respuesta.data.user.role // Si tu backend lo devuelve
           }
         });
 

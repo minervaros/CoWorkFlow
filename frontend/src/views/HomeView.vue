@@ -8,12 +8,12 @@
     <div class="contenedor-principal">
       <div v-if="cargando" class="spinner">Cargando salas disponibles...</div>
       
-      <div v-else-if="salas.length === 0" class="sin-salas">
+      <div v-else-if="salasVisibles.length === 0" class="sin-salas">
         No hay salas disponibles en este momento.
       </div>
 
       <div v-else class="grid-salas">
-        <div v-for="sala in salas" :key="sala.id" class="tarjeta-sala">
+        <div v-for="sala in salasVisibles" :key="sala.id" class="tarjeta-sala">
           <div class="info-sala">
             <h3>{{ sala.name }}</h3>
             <p>{{ sala.description }}</p>
@@ -26,6 +26,8 @@
             </button>
           </div>
         </div>
+
+        
       </div>
     </div>
   </div>
@@ -60,6 +62,12 @@ export default {
         path: '/reservas',
         query: { sala: sala.id, nombre: sala.name }
       });
+    }
+  },
+  computed: {
+    salasVisibles() {
+      // Solo mostramos las salas que tengan is_active === true
+      return this.salas.filter(sala => sala.is_active === true);
     }
   }
 }

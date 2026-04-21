@@ -35,6 +35,12 @@ const routes = [
     name: 'admin-bookings',
     component: () => import('../views/AdminReservasView.vue'),
     meta: { requiresAuth: true, role: 'admin' } 
+  },
+  {
+    path: '/admin/salas',
+    name: 'admin-salas',
+    component: () => import('../views/AdminSalasView.vue'),
+    meta: { requiresAuth: true, role: 'admin' }
   }
   
 ]
@@ -46,17 +52,41 @@ const router = createRouter({
 
 export default router
 
-// Este código se ejecuta antes de cada cambio de página
-router.beforeEach((to, from, next) => {
-  // Comprobamos si la ruta a la que va requiere estar logueado
-  const rutaProtegida = to.matched.some(record => record.meta.requiresAuth);
-  const estaLogueado = localStorage.getItem('user-token');
 
-  if (rutaProtegida && !estaLogueado) {
-    // Si es protegida y no hay token, al Login de cabeza
+router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem('user-token');
+  const role = localStorage.getItem('user-role'); // Recuperamos el rol guardado en el login
+
+  const rutaProtegida = to.matched.some(record => record.meta.requiresAuth);
+  const soloAdmin = to.matched.some(record => record.meta.role === 'admin');
+
+  // 1. Si la ruta requiere autenticación y no hay token -> Login
+  if (rutaProtegida && !token) {
     next('/login');
-  } else {
-    // Si todo está bien o la ruta es pública, adelante
+  } 
+  // 2. Si la ruta es solo para admin y el rol no es 'admin' -> Home
+  else if (soloAdmin && role !== 'admin') {
+    alert("Acceso denegado: Se requieren permisos de administrador.");
+    next('/'); // Lo mandamos a la home
+  } 
+  // 3. En cualquier otro caso (ruta pública o tiene permisos) -> Adelante
+  else {
     next();
   }
 });
+
+
+// // Este código se ejecuta antes de cada cambio de página
+// router.beforeEach((to, from, next) => {
+//   // Comprobamos si la ruta a la que va requiere estar logueado
+//   const rutaProtegida = to.matched.some(record => record.meta.requiresAuth);
+//   const estaLogueado = localStorage.getItem('user-token');
+
+//   if (rutaProtegida && !estaLogueado) {
+//     // Si es protegida y no hay token, al Login de cabeza
+//     next('/login');
+//   } else {
+//     // Si todo está bien o la ruta es pública, adelante
+//     next();
+//   }
+// });

@@ -96,6 +96,7 @@ export default {
         alert(error.response?.data?.message || "No se pudo cancelar la reserva");
       }
     }
+    
   }
 };
 </script>

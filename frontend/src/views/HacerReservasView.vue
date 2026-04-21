@@ -53,6 +53,13 @@ export default {
   },
   methods: {
     async confirmarReserva() {
+
+        if (this.horaFin <= this.horaInicio) {
+            this.esError = true;
+            this.mensaje = "La hora de finalización debe ser posterior a la de inicio.";
+            return;
+        }
+
         this.cargando = true;
         this.mensaje = '';
         
