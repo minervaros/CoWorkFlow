@@ -1,0 +1,28 @@
+<template>
+  <nav id="nav">
+    <router-link to="/">Inicio</router-link> |
+    <router-link to="/login">Login</router-link> |
+    <router-link to="/register">Registro</router-link>
+  </nav>
+  
+  <router-view/>
+</template>
+
+<style lang="scss">
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  text-align: center;
+  color: #2c3e50;
+}
+
+#nav {
+  padding: 30px;
+  a {
+    font-weight: bold;
+    color: #2c3e50;
+    &.router-link-exact-active {
+      color: #42b983; // Color verde de Vue
+    }
+  }
+}
+</style>

@@ -26,5 +26,16 @@ services:
       - db
     restart: on-failure
 
+  frontend:
+    build: ./frontend
+    container_name: cowork_frontend
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules 
+    depends_on:
+      - backend
+
 volumes:
   db_data:

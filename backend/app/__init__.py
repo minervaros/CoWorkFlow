@@ -3,6 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 import os
 from dotenv import load_dotenv
 from flask_jwt_extended import JWTManager 
+from flask_cors import CORS
+
 
 load_dotenv()
 
@@ -10,7 +12,9 @@ load_dotenv()
 db = SQLAlchemy()
 
 def create_app():
+
     app = Flask(__name__)
+    CORS(app)
 
     # Configuración de JWT
     app.config['JWT_SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY') 
