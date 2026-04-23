@@ -4,12 +4,117 @@ import os
 from dotenv import load_dotenv
 from flask_jwt_extended import JWTManager 
 from flask_cors import CORS
+from datetime import timedelta
+import json
 
 
 load_dotenv()
 
 # Inicializamos la instancia de SQLAlchemy
 db = SQLAlchemy()
+
+
+def seed_sample_rooms():
+    from app.models import Room
+
+    salas_muestra = [
+        {
+            "name": "Sala Ágora",
+            "location": "Sede Ruzafa",
+            "equipamiento": ["Pantalla 4K", "Pizarra", "Videollamada", "Café incluido"],
+            "description": "Sala luminosa para workshops creativos, sesiones de estrategia y dinámicas de equipo.",
+            "capacity": 8,
+            "price_per_hour": 24,
+            "image_url": "https://images.unsplash.com/photo-1497366412874-3415097a27e7?q=80&w=1200&auto=format&fit=crop"
+        },
+        {
+            "name": "Sala Turia",
+            "location": "Sede Ruzafa",
+            "equipamiento": ["Monitor ultrapanorámico", "Wifi premium", "Apple TV"],
+            "description": "Espacio ágil para reuniones de producto, entrevistas y trabajo híbrido con clientes.",
+            "capacity": 4,
+            "price_per_hour": 18,
+            "image_url": "https://images.unsplash.com/photo-1524758631624-e2822e304c36?q=80&w=1200&auto=format&fit=crop"
+        },
+        {
+            "name": "Sala Muralla",
+            "location": "Sede El Carmen",
+            "equipamiento": ["Proyector", "Pizarra", "Altavoz"],
+            "description": "Ambiente sereno para reuniones ejecutivas, revisiones de negocio y sesiones de planificación.",
+            "capacity": 10,
+            "price_per_hour": 28,
+            "image_url": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=1200&auto=format&fit=crop"
+        },
+        {
+            "name": "Sala Lonja",
+            "location": "Sede El Carmen",
+            "equipamiento": ["Pantalla 4K", "Videollamada", "Iluminación regulable"],
+            "description": "Sala elegante para presentaciones con clientes, comités y reuniones de alto impacto.",
+            "capacity": 12,
+            "price_per_hour": 32,
+            "image_url": "https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=1200&auto=format&fit=crop"
+        },
+        {
+            "name": "Sala Eixample One",
+            "location": "Sede Eixample",
+            "equipamiento": ["Proyector", "Pizarra", "Mesa modular", "Wifi premium"],
+            "description": "Configuración flexible para formación interna, workshops y sesiones de sprint planning.",
+            "capacity": 14,
+            "price_per_hour": 30,
+            "image_url": "https://images.unsplash.com/photo-1497366811353-6870744d04b2?q=80&w=1200&auto=format&fit=crop"
+        },
+        {
+            "name": "Sala Alameda",
+            "location": "Sede Eixample",
+            "equipamiento": ["Pantalla táctil", "Sonido envolvente", "Videollamada"],
+            "description": "Perfecta para demos, reuniones de ventas y sesiones con soporte audiovisual avanzado.",
+            "capacity": 6,
+            "price_per_hour": 26,
+            "image_url": "https://images.unsplash.com/photo-1517502884422-41eaead166d4?q=80&w=1200&auto=format&fit=crop"
+        },
+        {
+            "name": "Sala Mediterráneo",
+            "location": "Sede Cabanyal",
+            "equipamiento": ["Luz natural", "Pizarra", "Café incluido"],
+            "description": "Espacio relajado e inspirador para sesiones creativas, mentoring y trabajo profundo.",
+            "capacity": 5,
+            "price_per_hour": 20,
+            "image_url": "https://images.unsplash.com/photo-1497215842964-222b430dc094?q=80&w=1200&auto=format&fit=crop"
+        },
+        {
+            "name": "Sala Brisa",
+            "location": "Sede Cabanyal",
+            "equipamiento": ["Monitor 32\"", "Videollamada", "Cabina acústica cercana"],
+            "description": "Sala compacta para reuniones uno a uno, coaching y trabajo enfocado cerca del mar.",
+            "capacity": 3,
+            "price_per_hour": 16,
+            "image_url": "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1200&auto=format&fit=crop"
+        }
+    ]
+
+    nombres_existentes = {nombre for (nombre,) in db.session.query(Room.name).all()}
+    nuevas_salas = []
+
+    for sala in salas_muestra:
+        if sala["name"] in nombres_existentes:
+            continue
+
+        nuevas_salas.append(
+            Room(
+                name=sala["name"],
+                location=sala["location"],
+                equipamiento=json.dumps(sala["equipamiento"], ensure_ascii=False),
+                description=sala["description"],
+                capacity=sala["capacity"],
+                price_per_hour=sala["price_per_hour"],
+                is_active=True,
+                image_url=sala["image_url"]
+            )
+        )
+
+    if nuevas_salas:
+        db.session.add_all(nuevas_salas)
+        db.session.commit()
 
 def create_app():
 
@@ -18,6 +123,8 @@ def create_app():
 
     # Configuración de JWT
     app.config['JWT_SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY') 
+    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=15)
+    app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
     jwt = JWTManager(app)
 
     # Configuramos la URI de la base de datos usando variables de entorno
@@ -40,6 +147,28 @@ def create_app():
     # Creamos las tablas si no existen
     with app.app_context():
         db.create_all()
+        columns_result = db.session.execute(db.text("SHOW COLUMNS FROM rooms"))
+        room_columns = [row[0] for row in columns_result]
+        if 'location' not in room_columns:
+            db.session.execute(db.text('ALTER TABLE rooms ADD COLUMN location VARCHAR(255) NULL'))
+            db.session.commit()
+        if 'equipamiento' not in room_columns:
+            db.session.execute(db.text('ALTER TABLE rooms ADD COLUMN equipamiento TEXT NULL'))
+            db.session.commit()
+        if 'is_deleted' not in room_columns:
+            db.session.execute(db.text('ALTER TABLE rooms ADD COLUMN is_deleted BOOLEAN DEFAULT FALSE'))
+            db.session.commit()
+
+        booking_columns_result = db.session.execute(db.text("SHOW COLUMNS FROM bookings"))
+        booking_columns = [row[0] for row in booking_columns_result]
+        if 'payment_status' not in booking_columns:
+            db.session.execute(db.text("ALTER TABLE bookings ADD COLUMN payment_status VARCHAR(20) DEFAULT 'pending'"))
+            db.session.commit()
+        if 'payment_method' not in booking_columns:
+            db.session.execute(db.text("ALTER TABLE bookings ADD COLUMN payment_method VARCHAR(20) DEFAULT 'reception'"))
+            db.session.commit()
+
+        seed_sample_rooms()
 
 
     @app.route('/')
@@ -67,6 +196,9 @@ def create_app():
     from app.bookings import bookings_bp
     app.register_blueprint(bookings_bp, url_prefix='/api/bookings')
 
+    # Registramos el Blueprint de contacto (formulario + envío SMTP)
+    from app.contact import contact_bp
+    app.register_blueprint(contact_bp, url_prefix='/api/contact')
 
     return app
 

@@ -13,6 +13,11 @@ const routes = [
     component: () => import('../views/HomeView.vue') // <-- Tu antigua Home con el buscador y las tarjetas
   },
   {
+    path: '/salas/:id',
+    name: 'sala-detalle',
+    component: () => import('../views/SalaDetalleView.vue')
+  },
+  {
     path: '/login',
     name: 'login',
     component: LoginView
@@ -21,6 +26,17 @@ const routes = [
     path: '/register',
     name: 'register',
     component: () => import('../views/RegisterView.vue')
+  },
+  {
+    path: '/contacto',
+    name: 'contacto',
+    component: () => import('../views/ContactoView.vue')
+  },
+  {
+    path: '/reservar-tour',
+    name: 'reservar-tour',
+    component: () => import('../views/ReservarTourView.vue'),
+    meta: { requiresAuth: true }
   },
   {
     path: '/reservas',
@@ -35,6 +51,23 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/favoritos',
+    name: 'favoritos',
+    component: () => import('../views/FavoritosView.vue')
+  },
+  {
+    path: '/perfil',
+    name: 'perfil',
+    component: () => import('../views/PerfilView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/configuracion',
+    name: 'configuracion',
+    component: () => import('../views/ConfiguracionView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/admin/reservas',
     name: 'admin-bookings',
     component: () => import('../views/AdminReservasView.vue'),
@@ -45,13 +78,33 @@ const routes = [
     name: 'admin-salas',
     component: () => import('../views/AdminSalasView.vue'),
     meta: { requiresAuth: true, role: 'admin' }
+  },
+  {
+    path: '/admin/tours',
+    name: 'admin-tours',
+    component: () => import('../views/AdminToursView.vue'),
+    meta: { requiresAuth: true, role: 'admin' }
   }
   
 ]
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
-  routes
+  routes,
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition;
+    }
+
+    if (to.hash) {
+      return {
+        el: to.hash,
+        behavior: 'smooth'
+      };
+    }
+
+    return { top: 0 };
+  }
 })
 
 export default router
@@ -63,14 +116,28 @@ router.beforeEach((to, from, next) => {
 
   const rutaProtegida = to.matched.some(record => record.meta.requiresAuth);
   const soloAdmin = to.matched.some(record => record.meta.role === 'admin');
+  const esRutaAdmin = to.path.startsWith('/admin');
+
+  // Si es admin, lo mantenemos dentro del panel admin
+  if (token && role === 'admin' && !esRutaAdmin) {
+    next('/admin/reservas');
+    return;
+  }
 
   // 1. Si la ruta requiere autenticación y no hay token -> Login
   if (rutaProtegida && !token) {
-    next('/login');
+    next({
+      path: '/login',
+      query: { redirect: to.fullPath }
+    });
   } 
   // 2. Si la ruta es solo para admin y el rol no es 'admin' -> Home
   else if (soloAdmin && role !== 'admin') {
-    alert("Acceso denegado: Se requieren permisos de administrador.");
+    localStorage.setItem('ui-notice', JSON.stringify({
+      tipo: 'warning',
+      titulo: 'Acceso denegado',
+      mensaje: 'No tienes permisos de administrador para entrar en esa sección.'
+    }));
     next('/'); // Lo mandamos a la home
   } 
   // 3. En cualquier otro caso (ruta pública o tiene permisos) -> Adelante

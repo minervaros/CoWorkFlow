@@ -53,6 +53,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsI
 
 {
     "name": "Sala Recreativa",
+    "location": "Planta 2 - Ala Norte",
+    "equipamiento": ["Wifi", "Proyector", "Aire acondicionado"],
     "description": "Sala con juegos y espacio para relajarse",
     "capacity": 15,
     "price_per_hour": 20.5
@@ -96,7 +98,14 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsI
 PATCH http://localhost:8000/api/bookings/1/cancel
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3NjcxNjg1MiwianRpIjoiZWZjZDU1MTgtZjRlMC00MGM5LTgzOTctYTE4ZGUzNTBmNmVjIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjIiLCJuYmYiOjE3NzY3MTY4NTIsImNzcmYiOiI5YTYxODRhNi00NTQzLTQ5N2ItOTA1Ny1kMWEwZDA3M2YwNWMiLCJleHAiOjE3NzY3MTc3NTIsInJvbGUiOiJjbGllbnQifQ.bglssFGSl3Bx4Dnt8A7LOmX-FPPk-HSUf2Q_vTYBkeM
 
+### Enviar formulario de contacto (envía confirmación al usuario por SMTP)
+POST http://localhost:8000/api/contact/send
+Content-Type: application/json
 
-
-
+{
+  "nombre": "Ana Torres",
+  "email": "ana@example.com",
+  "asunto": "Duda sobre una reserva",
+  "mensaje": "Hola, necesito cambiar la hora de mi reserva del martes."
+}
 

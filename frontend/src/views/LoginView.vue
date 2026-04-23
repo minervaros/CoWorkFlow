@@ -1,23 +1,35 @@
 <template>
   <div class="login-container">
-    <form @submit.prevent="manejarLogin" class="formulario-login">
-      <h2>Bienvenido a CoWorkFlow</h2>
-      <p>Introduce tus credenciales para acceder</p>
+    <div class="auth-card">
+      <aside class="auth-panel">
+        <div class="auth-panel-content">
+          <p class="auth-kicker">CoWorkFlow</p>
+          <h2>Bienvenido de vuelta</h2>
+        </div>
+        <img :src="require('@/assets/cowork-illustration.png')" alt="Equipo en coworking" class="auth-illustration" />
+      </aside>
 
-      <div class="form-group">
-        <label>Email</label>
-        <input v-model="email" type="email" placeholder="ejemplo@correo.com" required />
-      </div>
+      <form @submit.prevent="manejarLogin" class="formulario-login">
+        <h3>Iniciar sesión</h3>
+        <p>Introduce tus credenciales para acceder</p>
 
-      <div class="form-group">
-        <label>Contraseña</label>
-        <input v-model="password" type="password" placeholder="********" required />
-      </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input v-model="email" type="email" placeholder="ejemplo@correo.com" required />
+        </div>
 
-      <button type="submit" class="btn-login">Entrar</button>
-      
-      <p v-if="error" class="error-msg">{{ error }}</p>
-    </form>
+        <div class="form-group">
+          <label>Contraseña</label>
+          <input v-model="password" type="password" placeholder="********" required />
+        </div>
+
+        <button type="submit" class="btn-login">Entrar</button>
+        
+        <p v-if="error" class="error-msg">{{ error }}</p>
+
+        <p class="enlace-registro">¿No tienes cuenta? <router-link to="/register">Regístrate</router-link></p>
+      </form>
+    </div>
   </div>
 </template>
 
@@ -32,6 +44,18 @@ export default {
       email: '',
       password: '',
       error: null
+    }
+  },
+  mounted() {
+    const sessionExpiredMessage = localStorage.getItem('session-expired-message');
+    if (sessionExpiredMessage) {
+      this.error = sessionExpiredMessage;
+      localStorage.removeItem('session-expired-message');
+      return;
+    }
+
+    if (this.$route.query.redirect) {
+      this.error = 'Debes iniciar sesión para continuar con tu reserva.';
     }
   },
   methods: {
@@ -49,6 +73,7 @@ export default {
         // Usamos 'dispatch' para llamar a la acción que creamos en el Store
         await this.$store.dispatch('saveLogin', {
           token: respuesta.data.access_token,
+          refreshToken: respuesta.data.refresh_token,
           user: {
             email: this.email,
             role: respuesta.data.user.role // Si tu backend lo devuelve
@@ -57,8 +82,13 @@ export default {
 
         console.log("¡Login exitoso!");
 
-        // 3. Redirigimos al usuario a la página de inicio
-        this.$router.push('/');
+        // 3. Redirigimos al destino original (si venía de una ruta protegida)
+        const redirect = this.$route.query.redirect;
+        if (typeof redirect === 'string' && redirect.startsWith('/')) {
+          this.$router.push(redirect);
+        } else {
+          this.$router.push('/');
+        }
 
       } catch (err) {
         // 4. Si hay un error (401, 404, 500...), lo mostramos
@@ -75,76 +105,168 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
-$color-primario: #42b983;
-$color-oscuro: #2c3e50;
-$color-error: #e74c3c;
+$color-primario: #362521;
+$color-acento: #1b4fd6;
+$color-oscuro: #2b1b17;
+$color-error: #b42318;
 
 .login-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 70vh;
+  min-height: calc(100vh - 120px);
+  padding: 2rem 1.25rem;
+}
 
-  .formulario-login {
-    background: white;
-    padding: 2rem;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+.auth-card {
+  width: min(980px, 100%);
+  display: grid;
+  grid-template-columns: minmax(260px, 0.95fr) minmax(320px, 1fr);
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1px solid #eaddd3;
+  box-shadow: 0 20px 46px rgba(43, 27, 23, 0.12);
+  text-shadow: none;
+}
+
+.auth-panel {
+  background: linear-gradient(180deg, #f4ebe3 0%, #e9ded4 100%);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 360px;
+
+  .auth-panel-content {
+    position: relative;
+    z-index: 2;
+    padding: 2.1rem 1.8rem;
+  }
+
+  .auth-kicker {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.78rem;
+    color: #6e5e58;
+    margin: 0 0 0.6rem;
+    font-weight: 700;
+  }
+
+  h2 {
+    margin: 0;
+    color: white;
+    font-size: 2rem;
+    line-height: 1.12;
+    text-shadow: 0 2px 15px rgba(1, 1, 0, 2.85);
+  }
+
+
+  .auth-illustration {
+    position: absolute;
+    bottom: 0;
+    left: 0;
     width: 100%;
-    max-width: 400px;
+    height: 100%;
+    object-fit: cover;
+    object-position: center bottom;
+    z-index: 1;
+    opacity: 0.75;
+  }
+}
 
-    h2 {
-      color: $color-oscuro;
-      margin-bottom: 0.5rem;
+.formulario-login {
+  background: white;
+  padding: 2rem;
+  text-align: left;
+  text-shadow: none;
+
+  h3 {
+    color: $color-oscuro;
+    margin: 0;
+    font-size: 1.45rem;
+  }
+
+  > p {
+    color: #6e5e58;
+    margin: 0.45rem 0 1.4rem;
+  }
+}
+
+.form-group {
+  margin-bottom: 1.1rem;
+
+  label {
+    display: block;
+    margin-bottom: 0.45rem;
+    font-weight: 600;
+    color: $color-oscuro;
+  }
+
+  input {
+    width: 100%;
+    padding: 0.82rem 0.9rem;
+    border: 1px solid #e2d7cf;
+    border-radius: 999px;
+    box-sizing: border-box;
+    color: $color-oscuro;
+
+    &:focus {
+      outline: none;
+      border-color: $color-acento;
+      box-shadow: 0 0 0 3px rgba(27, 79, 214, 0.14);
     }
+  }
+}
 
-    .form-group {
-      margin-bottom: 1.5rem;
-      text-align: left;
+.btn-login {
+  width: 100%;
+  padding: 0.9rem;
+  background-color: $color-primario;
+  color: white;
+  border: none;
+  border-radius: 999px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
 
-      label {
-        display: block;
-        margin-bottom: 0.5rem;
-        font-weight: bold;
-      }
+  &:hover {
+    background-color: #4a3530;
+    transform: translateY(-1px);
+  }
+}
 
-      input {
-        width: 100%;
-        padding: 0.8rem;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        box-sizing: border-box; // Para que el padding no ensanche el input
+.error-msg {
+  color: $color-error;
+  margin-top: 0.9rem;
+  font-size: 0.9rem;
+  text-align: center;
+}
 
-        &:focus {
-          outline: none;
-          border-color: $color-primario;
-        }
-      }
-    }
+.enlace-registro {
+  text-align: center;
+  margin-top: 1rem;
+  font-size: 0.88rem;
+  color: #6e5e58;
 
-    .btn-login {
-      width: 100%;
-      padding: 1rem;
-      background-color: $color-primario;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      font-size: 1rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.3s;
+  a {
+    color: $color-acento;
+    font-weight: 700;
+    text-decoration: none;
+  }
 
-      &:hover {
-        background-color: darken($color-primario, 10%);
-      }
-    }
+  a:hover {
+    text-decoration: underline;
+  }
+}
 
-    .error-msg {
-      color: $color-error;
-      margin-top: 1rem;
-      font-size: 0.9rem;
-    }
+@media (max-width: 860px) {
+  .auth-card {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-panel {
+    padding: 1.5rem;
   }
 }
 </style>

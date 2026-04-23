@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from app import db
 from app.models import User
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
+from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity, get_jwt
 
 # Creamos el Blueprint para autenticación
 auth_bp = Blueprint('auth', __name__)
@@ -53,10 +53,12 @@ def login():
             identity=str(user.id), 
             additional_claims={"role": user.role}
         )
+        refresh_token = create_refresh_token(identity=str(user.id))
         
         return jsonify({
             "message": "Bienvenido a CoWorkFlow",
             "access_token": token,
+            "refresh_token": refresh_token,
             "user": {
                 "full_name": user.full_name,
                 "role": user.role
@@ -85,6 +87,20 @@ def get_profile():
         "role": user.role,
         "message": "Acceso concedido al perfil protegido"
     }), 200
+
+
+@auth_bp.route('/refresh', methods=['POST'])
+@jwt_required(refresh=True)
+def refresh_access_token():
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    role = user.role if user else 'client'
+    new_access_token = create_access_token(
+        identity=str(current_user_id),
+        additional_claims={"role": role}
+    )
+
+    return jsonify({"access_token": new_access_token}), 200
 
 @auth_bp.route('/admin/users/', methods=['GET'])
 @jwt_required()
