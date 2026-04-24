@@ -11,23 +11,23 @@
               Te confirmaremos por correo lo antes posible.
             </p>
           </div>
-          <img :src="require('@/assets/cowork-illustration.png')" alt="Visita guiada en coworking" class="tour-illustration" />
+          <img :src="require('@/assets/imagen-tour.png')" alt="Visita guiada en coworking" class="tour-illustration" />
         </aside>
 
         <form class="tour-form" @submit.prevent="enviarFormulario">
           <div class="campo">
             <label for="tour-nombre">Nombre completo</label>
-            <input id="tour-nombre" v-model.trim="form.nombreCompleto" type="text" required maxlength="120" />
+            <input id="tour-nombre" v-model.trim="form.nombreCompleto" type="text" placeholder="Ej: Nombre Apellido" required maxlength="120" />
           </div>
 
           <div class="campo">
             <label for="tour-correo">Correo</label>
-            <input id="tour-correo" v-model.trim="form.correo" type="email" required maxlength="180" />
+            <input id="tour-correo" v-model.trim="form.correo" type="email" placeholder="Ej: ana@correo.com" required maxlength="180" />
           </div>
 
           <div class="campo">
             <label for="tour-telefono">Num. teléfono</label>
-            <input id="tour-telefono" v-model.trim="form.telefono" type="tel" required maxlength="30" />
+            <input id="tour-telefono" v-model.trim="form.telefono" type="tel" placeholder="Ej: 600 123 456" required maxlength="30" />
           </div>
 
           <div class="campo campo-duo">
@@ -48,7 +48,7 @@
             </div>
             <div>
               <label for="tour-empresa">Nombre de la empresa/autónomo</label>
-              <input id="tour-empresa" v-model.trim="form.empresa" type="text" required maxlength="160" />
+              <input id="tour-empresa" v-model.trim="form.empresa" type="text" placeholder="Ej: Crea Studio" required maxlength="160" />
             </div>
           </div>
 
@@ -218,7 +218,7 @@ export default {
 .reservar-tour-view {
   min-height: 100vh;
   padding: 7.5rem 1.25rem 2rem;
-  background: linear-gradient(180deg, #fbf7f4 0%, #f6f0eb 100%);
+  background: transparent;
 }
 
 .tour-wrap {
@@ -229,9 +229,9 @@ export default {
 .tour-card {
   display: grid;
   grid-template-columns: minmax(260px, 0.92fr) minmax(340px, 1fr);
-  border-radius: 24px;
+  border-radius: 28px;
   overflow: hidden;
-  border: 1px solid #eaddd3;
+  border: 16px solid #ffffff;
   box-shadow: 0 20px 46px rgba(43, 27, 23, 0.12);
   text-shadow: none;
 }
@@ -241,22 +241,36 @@ export default {
   position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
+  align-items: flex-start;
   overflow: hidden;
   min-height: 360px;
 
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(66, 41, 33, 0.62);
+    z-index: 2;
+    pointer-events: none;
+  }
+
   .tour-panel-content {
     position: relative;
-    z-index: 2;
-    padding: 2rem 1.8rem;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 1.35rem;
+    width: 100%;
+    padding: 1.1rem 1.8rem 2rem;
   }
 
   .tour-kicker {
-    margin: 0 0 0.6rem;
+    margin: 0;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-size: 0.78rem;
-    color: #f6ece4;
+    color: #ffffff;
     font-weight: 700;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
   }
@@ -264,16 +278,18 @@ export default {
   h1 {
     margin: 0;
     color: #ffffff;
-    font-size: 2rem;
+    font-size: 2.5rem;
     line-height: 1.12;
     text-shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
+    margin-top: 60px;
   }
 
   p {
-    margin: 0.75rem 0 0;
-    color: #f5ebe4;
+    margin: 0;
+    color: #ffffff;
     line-height: 1.5;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+    font-weight: 500;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.85);
   }
 
   .tour-illustration {
@@ -289,8 +305,9 @@ export default {
 }
 
 .tour-form {
-  background: #fff;
+  background: #fff6ee;
   padding: 1.7rem;
+  min-width: 0;
   text-shadow: none;
 }
 
@@ -310,6 +327,14 @@ export default {
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
+    min-width: 0;
+  }
+
+  label {
+    min-height: 2.75rem;
+    display: flex;
+    align-items: flex-end;
+    line-height: 1.2;
   }
 }
 
@@ -320,10 +345,20 @@ export default {
 
 .campo input {
   border: 1px solid #e1d2c6;
+  background: #fffaf6;
   border-radius: 999px;
+  box-shadow: 1px 1px 5px rgba(169, 135, 126, 0.12);
+  width: 100%;
+  min-height: 3rem;
   padding: 0.7rem 0.8rem;
   font: inherit;
   color: #2b1b17;
+  box-sizing: border-box;
+}
+
+.campo input::placeholder {
+  color: #bda79b;
+  opacity: 0.8;
 }
 
 .campo input:focus {
@@ -338,7 +373,7 @@ export default {
 .btn-principal {
   border: none;
   border-radius: 999px;
-  background: #362521;
+  background: #6d534d;
   color: #fff;
   padding: 0.8rem 1.2rem;
   font-weight: 600;
@@ -359,6 +394,7 @@ export default {
   border-radius: 10px;
   padding: 0.7rem 0.85rem;
   font-weight: 600;
+  text-align: center;
 }
 
 .feedback.ok {

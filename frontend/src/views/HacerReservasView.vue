@@ -5,6 +5,7 @@
         <p class="reserva-kicker">Reserva inteligente</p>
         <h2>Nueva reserva</h2>
         <p>Configura fecha, tramo horario y confirma tu espacio.</p>
+        <img :src="require('@/assets/reserva-salas.png')" alt="Reserva de salas" class="reserva-illustration" />
       </aside>
 
       <div class="reserva-form-area">
@@ -528,6 +529,8 @@ export default {
 
 .reserva-panel {
   background: linear-gradient(180deg, #f4ebe3 0%, #e9ded4 100%);
+  position: relative;
+  overflow: hidden;
   padding: 2rem 1.8rem;
   display: flex;
   flex-direction: column;
@@ -535,6 +538,8 @@ export default {
 }
 
 .reserva-kicker {
+  position: relative;
+  z-index: 2;
   margin: 0 0 0.6rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -544,6 +549,8 @@ export default {
 }
 
 .reserva-panel h2 {
+  position: relative;
+  z-index: 2;
   margin: 0;
   font-size: 2rem;
   color: #2b1b17;
@@ -551,9 +558,22 @@ export default {
 }
 
 .reserva-panel p {
+  position: relative;
+  z-index: 2;
   margin: 0.75rem 0 0;
   color: #5a463f;
   line-height: 1.5;
+}
+
+.reserva-illustration {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 1;
+  opacity: 0.22;
 }
 
 .reserva-form-area {

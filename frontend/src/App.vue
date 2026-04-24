@@ -5,18 +5,30 @@
         <router-link :to="esAdmin ? '/admin/reservas' : '/'">CoWorkFlow</router-link>
       </div>
 
-      <div v-if="esAdmin" class="nav-links nav-links-admin">
+      <button
+        type="button"
+        class="nav-hamburger"
+        :aria-expanded="mostrarMenuMovil ? 'true' : 'false'"
+        aria-label="Abrir menú de navegación"
+        @click="toggleMenuMovil"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <div v-if="esAdmin" :class="['nav-links', 'nav-links-admin', { 'is-open': mostrarMenuMovil }]">
         <span class="admin-label">Panel Admin</span>
-        <router-link to="/admin/reservas">Reservas</router-link>
-        <router-link to="/admin/tours">Tours</router-link>
-        <router-link to="/admin/salas">Salas</router-link>
+        <router-link to="/admin/reservas" @click="cerrarMenuMovil">Reservas</router-link>
+        <router-link to="/admin/tours" @click="cerrarMenuMovil">Tours</router-link>
+        <router-link to="/admin/salas" @click="cerrarMenuMovil">Salas</router-link>
         <button type="button" class="nav-link-btn" @click="confirmarCerrarSesion">Cerrar sesión</button>
       </div>
 
-      <div v-else class="nav-links">
-        <router-link to="/">Inicio</router-link>
-        <router-link :to="{ path: '/', hash: '#servicios' }">Servicios</router-link>
-        <router-link to="/salas">Catálogo</router-link>
+      <div v-else :class="['nav-links', { 'is-open': mostrarMenuMovil }]">
+        <router-link to="/" @click="cerrarMenuMovil">Inicio</router-link>
+        <router-link :to="{ path: '/', hash: '#servicios' }" @click="cerrarMenuMovil">Servicios</router-link>
+        <router-link to="/salas" @click="cerrarMenuMovil">Catálogo</router-link>
         <button type="button" class="nav-link-btn" @click="abrirModalContacto">Contacto</button>
 
         <div class="tour-menu" @keyup.esc="cerrarMenuTour">
@@ -41,7 +53,7 @@
                 :key="sede.slug"
                 :to="{ path: '/reservar-tour', query: { sede: sede.slug } }"
                 class="tour-sede-item"
-                @click="cerrarMenuTour"
+                @click="cerrarMenuTour(); cerrarMenuMovil()"
               >
                 <span class="tour-sede-nombre">{{ sede.nombre }}</span>
                 <span class="tour-sede-barrio">{{ sede.barrio }}</span>
@@ -60,7 +72,7 @@
         </template>
 
         <div class="auth-actions">
-          <router-link v-if="!estaLogueado" to="/login" class="btn-login">Entrar</router-link>
+          <router-link v-if="!estaLogueado" to="/login" class="btn-login" @click="cerrarMenuMovil">Entrar</router-link>
 
           <div v-else class="profile-menu" @keyup.esc="cerrarMenuPerfil">
             <button
@@ -81,10 +93,10 @@
                   <strong>{{ usuarioEmailMostrado }}</strong>
                 </div>
 
-                <router-link to="/perfil" @click="cerrarMenuPerfil">Mi perfil</router-link>
-                <router-link to="/mis-reservas" @click="cerrarMenuPerfil">Mis reservas</router-link>
-                <router-link to="/favoritos" @click="cerrarMenuPerfil">Favoritos</router-link>
-                <router-link to="/configuracion" @click="cerrarMenuPerfil">Configuración</router-link>
+                <router-link to="/perfil" @click="cerrarMenuPerfil(); cerrarMenuMovil()">Mi perfil</router-link>
+                <router-link to="/mis-reservas" @click="cerrarMenuPerfil(); cerrarMenuMovil()">Mis reservas</router-link>
+                <router-link to="/favoritos" @click="cerrarMenuPerfil(); cerrarMenuMovil()">Favoritos</router-link>
+                <router-link to="/configuracion" @click="cerrarMenuPerfil(); cerrarMenuMovil()">Configuración</router-link>
 
                 <button type="button" class="profile-logout" @click="abrirModalCerrarSesionDesdePerfil">
                   Cerrar sesión
@@ -186,6 +198,8 @@ export default {
       notificacionTimer: null,
       mostrarMenuPerfil: false,
       mostrarMenuTour: false,
+      mostrarMenuMovil: false,
+      esMovilNav: false,
       sedes: [
         { nombre: 'Crea. Ruzafa', barrio: 'Ruzafa', slug: 'ruzafa' },
         { nombre: 'Crea. El Carmen', barrio: 'El Carmen', slug: 'el-carmen' },
@@ -239,6 +253,19 @@ export default {
     toggleMenuTour() {
       this.mostrarMenuTour = !this.mostrarMenuTour;
     },
+    toggleMenuMovil() {
+      if (!this.esMovilNav) return;
+      this.mostrarMenuMovil = !this.mostrarMenuMovil;
+    },
+    cerrarMenuMovil() {
+      this.mostrarMenuMovil = false;
+    },
+    actualizarModoNavMovil() {
+      this.esMovilNav = window.innerWidth <= 900;
+      if (!this.esMovilNav) {
+        this.mostrarMenuMovil = false;
+      }
+    },
     cerrarMenuTour() {
       this.mostrarMenuTour = false;
     },
@@ -257,6 +284,13 @@ export default {
       this.cerrarMenuTour();
       }
     },
+    handleClickFueraNavbar(event) {
+      if (!this.esMovilNav || !this.mostrarMenuMovil) return;
+      const navbar = this.$el.querySelector('.navbar');
+      if (navbar && !navbar.contains(event.target)) {
+        this.cerrarMenuMovil();
+      }
+    },
     abrirModalCerrarSesion() {
       this.cerrarMenuPerfil();
       this.mostrarModalLogout = true;
@@ -267,6 +301,7 @@ export default {
     abrirModalContacto() {
       this.mostrarModalContacto = true;
       this.cerrarMenuPerfil();
+      this.cerrarMenuMovil();
     },
     cerrarModalContacto() {
       this.mostrarModalContacto = false;
@@ -318,21 +353,27 @@ export default {
   },
   mounted() {
     this.consumirNotificacionPendiente();
+    this.actualizarModoNavMovil();
     document.addEventListener('click', this.handleClickFueraPerfil);
     document.addEventListener('click', this.handleClickFueraTour);
+    document.addEventListener('click', this.handleClickFueraNavbar);
     document.addEventListener('keydown', this.handleGlobalKeydown);
+    window.addEventListener('resize', this.actualizarModoNavMovil);
   },
   watch: {
     $route() {
       this.consumirNotificacionPendiente();
       this.cerrarMenuPerfil();
+      this.cerrarMenuMovil();
       this.cerrarModalContacto();
     }
   },
   beforeUnmount() {
     document.removeEventListener('click', this.handleClickFueraPerfil);
     document.removeEventListener('click', this.handleClickFueraTour);
+    document.removeEventListener('click', this.handleClickFueraNavbar);
     document.removeEventListener('keydown', this.handleGlobalKeydown);
+    window.removeEventListener('resize', this.actualizarModoNavMovil);
     if (this.notificacionTimer) {
       clearTimeout(this.notificacionTimer);
     }
@@ -416,6 +457,29 @@ body {
   display: flex;
   align-items: center;
   gap: 0.2rem;
+}
+
+.nav-hamburger {
+  display: none;
+  width: 2.45rem;
+  height: 2.45rem;
+  border-radius: 8px;
+  border: 1px solid rgba(252, 250, 247, 0.72);
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.42rem;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 0.24rem;
+  cursor: pointer;
+}
+
+.nav-hamburger span {
+  display: block;
+  width: 1.25rem;
+  height: 2px;
+  border-radius: 999px;
+  background: #fcfaf7;
 }
 
 .nav-links-admin {
@@ -768,6 +832,51 @@ body {
 }
 
 @media (max-width: 900px) {
+  .navbar {
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    padding: 0.95rem 1.2rem;
+  }
+
+  .nav-hamburger {
+    display: inline-flex;
+    margin-left: auto;
+  }
+
+  .nav-links {
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.7rem;
+    background: rgba(25, 16, 13, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 12px;
+    padding: 0.8rem;
+    backdrop-filter: blur(8px);
+  }
+
+  .nav-links.is-open {
+    display: flex;
+  }
+
+  .auth-actions {
+    margin-left: 0;
+  }
+
+  .tour-menu,
+  .profile-menu {
+    width: 100%;
+  }
+
+  .tour-dropdown,
+  .profile-dropdown {
+    position: static;
+    transform: none;
+    margin-top: 0.5rem;
+    width: 100%;
+  }
+
   .site-footer-inner {
     flex-direction: column;
     align-items: flex-start;

@@ -2,12 +2,10 @@
   <div class="home">
     <header class="hero">
       <h1>Catálogo de Salas para Equipos que <em>Avanzan</em></h1>
-      <p>Encuentra el espacio ideal según capacidad, ambiente y presupuesto. Reserva en minutos, sin fricción.</p>
     </header>
 
     <section class="selector-barrios">
-      <h2>¿Qué energía encaja hoy con tu equipo?</h2>
-      <p>Elige una sede y descubre solo las salas de ese barrio.</p>
+      <p>Elige una sede para ver las salas disponibles de ese barrio.</p>
 
       <div class="grid-barrios">
         <article
@@ -35,14 +33,20 @@
       </div>
     </section>
 
-    <div v-if="!sedeActiva" class="estado-seleccion-sede">
-      Selecciona un barrio para ver sus salas disponibles.
-    </div>
-
-    <div v-else ref="catalogoPrincipal" class="contenedor-principal">
+    <div v-if="sedeActiva" ref="catalogoPrincipal" class="contenedor-principal">
       <div class="catalogo-layout">
         <aside class="sidebar-filtros">
-          <div class="panel-filtro">
+          <button
+            type="button"
+            class="filtros-mobile-toggle"
+            @click="toggleFiltrosMovil"
+            :aria-expanded="mostrarPanelFiltros ? 'true' : 'false'"
+          >
+            {{ mostrarPanelFiltros ? 'Ocultar filtros' : 'Mostrar filtros' }}
+          </button>
+
+          <transition name="desplegable-filtros">
+            <div v-show="mostrarPanelFiltros" class="panel-filtro">
             <div class="sidebar-header sidebar-header-principal">
               <h3>Filtros</h3>
             </div>
@@ -101,7 +105,8 @@
               </label>
               <p v-if="!equipamientosDisponibles.length" class="sin-opciones">No hay equipación disponible.</p>
             </div>
-          </div>
+            </div>
+          </transition>
         </aside>
 
         <section class="contenido-catalogo">
@@ -171,8 +176,17 @@ export default {
       ubicacionSeleccionada: '',
       equipamientosSeleccionados: [],
       defaultRoomImage: 'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=500',
-      cargando: true
+      cargando: true,
+      esMovil: false,
+      filtrosMovilAbierto: false
     }
+  },
+  mounted() {
+    this.actualizarModoMovil();
+    window.addEventListener('resize', this.actualizarModoMovil);
+  },
+  beforeUnmount() {
+    window.removeEventListener('resize', this.actualizarModoMovil);
   },
   async created() {
     // Al cargar la página, pedimos las salas al backend
@@ -283,6 +297,20 @@ export default {
     sincronizarSedeDesdeSelector() {
       this.sedeActiva = this.ubicacionSeleccionada || '';
     },
+    toggleFiltrosMovil() {
+      if (!this.esMovil) return;
+      this.filtrosMovilAbierto = !this.filtrosMovilAbierto;
+    },
+    actualizarModoMovil() {
+      const eraMovil = this.esMovil;
+      this.esMovil = window.innerWidth <= 960;
+
+      if (!this.esMovil) {
+        this.filtrosMovilAbierto = true;
+      } else if (!eraMovil) {
+        this.filtrosMovilAbierto = false;
+      }
+    },
     limpiarSede() {
       this.sedeActiva = '';
       this.ubicacionSeleccionada = '';
@@ -302,6 +330,9 @@ export default {
     }
   },
   computed: {
+    mostrarPanelFiltros() {
+      return !this.esMovil || this.filtrosMovilAbierto;
+    },
     ubicacionesDisponibles() {
       const ubicaciones = this.salas
         .map(sala => (sala.location || '').trim())
@@ -387,15 +418,6 @@ export default {
   font-weight: 400;
 }
 
-.hero p {
-  font-size: 1.2rem;
-  color: #f0e8e0;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
-  max-width: 760px;
-  margin: 0 auto;
-  line-height: 1.6;
-}
-
 .selector-barrios {
   max-width: 1320px;
   margin: 0 auto;
@@ -412,14 +434,21 @@ export default {
   }
 
   > p {
-    color: #efe6df;
-    margin-bottom: 1rem;
+    display: inline-block;
+    color: #fffaf6;
+    font-size: 1.2rem;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    margin: 0 0 2rem;
+    padding: 0.45rem 0.9rem;
+    border-radius: 999px;
+    border: 2px solid rgba(255, 255, 255, 0.45);
   }
 }
 
 .grid-barrios {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.9rem;
 }
 
@@ -468,18 +497,18 @@ export default {
   flex-direction: column;
   justify-content: flex-end;
   gap: 0.35rem;
-  padding: 1rem;
+  padding: 1rem 1rem 1rem 3.25rem;
   background: linear-gradient(180deg, rgba(25, 15, 11, 0.1) 28%, rgba(18, 10, 7, 0.82) 100%);
 
   h3 {
     margin: 0;
-    font-size: 1.25rem;
+    font-size: 2.0rem;
     color: #fff;
   }
 
   p {
     margin: 0;
-    font-size: 0.88rem;
+    font-size: 1rem;
     line-height: 1.4;
     color: #efe2da;
     min-height: auto;
@@ -487,7 +516,7 @@ export default {
 }
 
 .barrio-kicker {
-  font-size: 0.72rem;
+  font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: #f5ddd0;
@@ -502,7 +531,7 @@ export default {
   border: 1px solid rgba(255, 255, 255, 0.8);
   background: rgba(255, 255, 255, 0.08);
   color: #fff;
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   letter-spacing: 0.02em;
   cursor: pointer;
   backdrop-filter: blur(2px);
@@ -561,6 +590,33 @@ export default {
 
 .sidebar-filtros {
   height: auto;
+}
+
+.filtros-mobile-toggle {
+  display: none;
+  width: 100%;
+  border: 1px solid #e2d7cf;
+  background: #ffffff;
+  color: #2b1b17;
+  border-radius: 10px;
+  padding: 0.72rem 0.9rem;
+  font-size: 0.96rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 5px 14px rgba(43, 27, 23, 0.06);
+}
+
+.desplegable-filtros-enter-active,
+.desplegable-filtros-leave-active {
+  transition: opacity 0.22s ease, transform 0.22s ease;
+  transform-origin: top;
+}
+
+.desplegable-filtros-enter-from,
+.desplegable-filtros-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
 }
 
 .panel-filtro {
@@ -913,6 +969,15 @@ export default {
   .sidebar-filtros {
     position: static;
     height: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .filtros-mobile-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
   }
 
   .panel-filtro,

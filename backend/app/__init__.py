@@ -37,6 +37,42 @@ def seed_sample_rooms():
             "image_url": "https://images.unsplash.com/photo-1524758631624-e2822e304c36?q=80&w=1200&auto=format&fit=crop"
         },
         {
+            "name": "Sala Mercado",
+            "location": "Sede Ruzafa",
+            "equipamiento": ["Pizarra", "Videollamada", "Altavoz"],
+            "description": "Ideal para reuniones comerciales y revisiones de pipeline con equipos híbridos.",
+            "capacity": 6,
+            "price_per_hour": 22,
+            "image_url": "https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=1200&auto=format&fit=crop"
+        },
+        {
+            "name": "Sala Russafa Hub",
+            "location": "Sede Ruzafa",
+            "equipamiento": ["Pantalla 4K", "Wifi premium", "Apple TV"],
+            "description": "Espacio versátil para demos, reuniones de seguimiento y presentaciones breves.",
+            "capacity": 7,
+            "price_per_hour": 23,
+            "image_url": "https://images.unsplash.com/photo-1497366811353-6870744d04b2?q=80&w=1200&auto=format&fit=crop"
+        },
+        {
+            "name": "Sala Creativa",
+            "location": "Sede Ruzafa",
+            "equipamiento": ["Pizarra", "Mesa modular", "Café incluido"],
+            "description": "Diseñada para sesiones de ideación, retrospectivas y talleres colaborativos.",
+            "capacity": 9,
+            "price_per_hour": 25,
+            "image_url": "https://images.unsplash.com/photo-1556761175-b413da4baf72?q=80&w=1200&auto=format&fit=crop"
+        },
+        {
+            "name": "Sala Ruzafa Pro",
+            "location": "Sede Ruzafa",
+            "equipamiento": ["Proyector", "Videollamada", "Iluminación regulable"],
+            "description": "Entorno profesional para reuniones con cliente y toma de decisiones estratégicas.",
+            "capacity": 10,
+            "price_per_hour": 27,
+            "image_url": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=1200&auto=format&fit=crop"
+        },
+        {
             "name": "Sala Muralla",
             "location": "Sede El Carmen",
             "equipamiento": ["Proyector", "Pizarra", "Altavoz"],
@@ -53,6 +89,42 @@ def seed_sample_rooms():
             "capacity": 12,
             "price_per_hour": 32,
             "image_url": "https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=1200&auto=format&fit=crop"
+        },
+        {
+            "name": "Sala Quart",
+            "location": "Sede El Carmen",
+            "equipamiento": ["Pantalla 4K", "Pizarra", "Wifi premium"],
+            "description": "Perfecta para reuniones de dirección y coordinación entre departamentos.",
+            "capacity": 8,
+            "price_per_hour": 26,
+            "image_url": "https://images.unsplash.com/photo-1524758631624-e2822e304c36?q=80&w=1200&auto=format&fit=crop"
+        },
+        {
+            "name": "Sala Serranos",
+            "location": "Sede El Carmen",
+            "equipamiento": ["Monitor ultrapanorámico", "Videollamada", "Altavoz"],
+            "description": "Sala dinámica para sincronizaciones de producto y revisiones técnicas.",
+            "capacity": 6,
+            "price_per_hour": 24,
+            "image_url": "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1200&auto=format&fit=crop"
+        },
+        {
+            "name": "Sala Carme",
+            "location": "Sede El Carmen",
+            "equipamiento": ["Proyector", "Mesa modular", "Café incluido"],
+            "description": "Espacio cómodo para formación interna, entrevistas y reuniones operativas.",
+            "capacity": 9,
+            "price_per_hour": 27,
+            "image_url": "https://images.unsplash.com/photo-1497215842964-222b430dc094?q=80&w=1200&auto=format&fit=crop"
+        },
+        {
+            "name": "Sala Plaza Redonda",
+            "location": "Sede El Carmen",
+            "equipamiento": ["Pantalla táctil", "Videollamada", "Iluminación regulable"],
+            "description": "Preparada para presentaciones comerciales y sesiones de validación con clientes.",
+            "capacity": 11,
+            "price_per_hour": 31,
+            "image_url": "https://images.unsplash.com/photo-1497366811353-6870744d04b2?q=80&w=1200&auto=format&fit=crop"
         },
         {
             "name": "Sala Eixample One",
@@ -73,6 +145,42 @@ def seed_sample_rooms():
             "image_url": "https://images.unsplash.com/photo-1517502884422-41eaead166d4?q=80&w=1200&auto=format&fit=crop"
         },
         {
+            "name": "Sala Colón",
+            "location": "Sede Eixample",
+            "equipamiento": ["Pantalla 4K", "Videollamada", "Pizarra"],
+            "description": "Excelente para demos de producto, kick-offs y sesiones de seguimiento semanal.",
+            "capacity": 8,
+            "price_per_hour": 27,
+            "image_url": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=1200&auto=format&fit=crop"
+        },
+        {
+            "name": "Sala Reino",
+            "location": "Sede Eixample",
+            "equipamiento": ["Monitor 32\"", "Wifi premium", "Apple TV"],
+            "description": "Sala compacta para reuniones de análisis, entrevistas y coordinación rápida.",
+            "capacity": 5,
+            "price_per_hour": 21,
+            "image_url": "https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=1200&auto=format&fit=crop"
+        },
+        {
+            "name": "Sala Cánovas",
+            "location": "Sede Eixample",
+            "equipamiento": ["Proyector", "Altavoz", "Café incluido"],
+            "description": "Entorno tranquilo para planificación trimestral y reuniones de liderazgo.",
+            "capacity": 10,
+            "price_per_hour": 29,
+            "image_url": "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1200&auto=format&fit=crop"
+        },
+        {
+            "name": "Sala Gran Vía",
+            "location": "Sede Eixample",
+            "equipamiento": ["Pantalla táctil", "Videollamada", "Sonido envolvente"],
+            "description": "Pensada para presentaciones de alto impacto y sesiones con stakeholders.",
+            "capacity": 12,
+            "price_per_hour": 33,
+            "image_url": "https://images.unsplash.com/photo-1556761175-b413da4baf72?q=80&w=1200&auto=format&fit=crop"
+        },
+        {
             "name": "Sala Mediterráneo",
             "location": "Sede Cabanyal",
             "equipamiento": ["Luz natural", "Pizarra", "Café incluido"],
@@ -89,6 +197,42 @@ def seed_sample_rooms():
             "capacity": 3,
             "price_per_hour": 16,
             "image_url": "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1200&auto=format&fit=crop"
+        },
+        {
+            "name": "Sala Marina",
+            "location": "Sede Cabanyal",
+            "equipamiento": ["Pantalla 4K", "Videollamada", "Wifi premium"],
+            "description": "Ideal para reuniones de planificación de campañas y coordinación de equipos distribuidos.",
+            "capacity": 7,
+            "price_per_hour": 22,
+            "image_url": "https://images.unsplash.com/photo-1524758631624-e2822e304c36?q=80&w=1200&auto=format&fit=crop"
+        },
+        {
+            "name": "Sala Atarazanas",
+            "location": "Sede Cabanyal",
+            "equipamiento": ["Proyector", "Pizarra", "Altavoz"],
+            "description": "Para workshops prácticos, formación interna y reuniones de ejecución.",
+            "capacity": 9,
+            "price_per_hour": 24,
+            "image_url": "https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=1200&auto=format&fit=crop"
+        },
+        {
+            "name": "Sala Levante",
+            "location": "Sede Cabanyal",
+            "equipamiento": ["Monitor ultrapanorámico", "Apple TV", "Iluminación regulable"],
+            "description": "Sala moderna para revisión de métricas, producto y decisiones de roadmap.",
+            "capacity": 6,
+            "price_per_hour": 23,
+            "image_url": "https://images.unsplash.com/photo-1497366811353-6870744d04b2?q=80&w=1200&auto=format&fit=crop"
+        },
+        {
+            "name": "Sala Arenas",
+            "location": "Sede Cabanyal",
+            "equipamiento": ["Pantalla táctil", "Sonido envolvente", "Café incluido"],
+            "description": "Excelente para sesiones con clientes, demos y cierre de propuestas.",
+            "capacity": 10,
+            "price_per_hour": 28,
+            "image_url": "https://images.unsplash.com/photo-1517502884422-41eaead166d4?q=80&w=1200&auto=format&fit=crop"
         }
     ]
 
@@ -115,6 +259,35 @@ def seed_sample_rooms():
     if nuevas_salas:
         db.session.add_all(nuevas_salas)
         db.session.commit()
+
+    sedes_objetivo = {sala["location"] for sala in salas_muestra}
+    nombres_objetivo = {sala["name"] for sala in salas_muestra}
+
+    for sede in sedes_objetivo:
+        salas_activas = (
+            db.session.query(Room)
+            .filter(Room.location == sede, Room.is_deleted == False)
+            .order_by(Room.id.asc())
+            .all()
+        )
+
+        excedente = len(salas_activas) - 6
+        if excedente <= 0:
+            continue
+
+        salas_no_semilla = [sala for sala in salas_activas if sala.name not in nombres_objetivo]
+        salas_semilla = [sala for sala in salas_activas if sala.name in nombres_objetivo]
+
+        a_desactivar = salas_no_semilla[:excedente]
+        faltan = excedente - len(a_desactivar)
+
+        if faltan > 0:
+            a_desactivar.extend(salas_semilla[:faltan])
+
+        for sala in a_desactivar:
+            sala.is_deleted = True
+
+    db.session.commit()
 
 def create_app():
 
