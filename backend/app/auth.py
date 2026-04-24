@@ -124,3 +124,53 @@ def get_all_users():
         })
     
     return jsonify(users_list), 200
+
+@auth_bp.route('/change-password', methods=['POST'])
+@jwt_required()
+def change_password():
+    data = request.get_json()
+    if not data or not data.get('current_password') or not data.get('new_password'):
+        return jsonify({"message": "Faltan datos obligatorios"}), 400
+
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    if not user:
+        return jsonify({"message": "Usuario no encontrado"}), 404
+
+    if not user.check_password(data['current_password']):
+        return jsonify({"message": "La contraseña actual es incorrecta"}), 400
+
+    user.set_password(data['new_password'])
+    db.session.commit()
+
+    return jsonify({"message": "Contraseña actualizada con éxito"}), 200
+
+@auth_bp.route('/delete-account', methods=['POST'])
+@jwt_required()
+def delete_account():
+    data = request.get_json()
+    if not data or not data.get('password'):
+        return jsonify({"message": "Faltan datos obligatorios"}), 400
+
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    if not user:
+        return jsonify({"message": "Usuario no encontrado"}), 404
+
+    if not user.check_password(data['password']):
+        return jsonify({"message": "La contraseña es incorrecta"}), 400
+
+    from app.models import Booking, TourBooking
+    
+    try:
+        # Borramos las dependencias de este usuario primero
+        Booking.query.filter_by(user_id=current_user_id).delete()
+        TourBooking.query.filter_by(user_id=current_user_id).delete()
+        
+        # Borramos al usuario
+        db.session.delete(user)
+        db.session.commit()
+        return jsonify({"message": "Cuenta eliminada con éxito"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"message": f"Error al eliminar la cuenta: {str(e)}"}), 500
