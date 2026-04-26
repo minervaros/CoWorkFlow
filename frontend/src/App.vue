@@ -93,11 +93,13 @@
                   <strong>{{ usuarioEmailMostrado }}</strong>
                 </div>
 
-                <router-link to="/perfil" @click="cerrarMenuPerfil(); cerrarMenuMovil()">Mi perfil</router-link>
                 <router-link to="/mis-reservas" @click="cerrarMenuPerfil(); cerrarMenuMovil()">Mis reservas</router-link>
                 <router-link to="/favoritos" @click="cerrarMenuPerfil(); cerrarMenuMovil()">Favoritos</router-link>
                 <router-link to="/configuracion" @click="cerrarMenuPerfil(); cerrarMenuMovil()">Configuración</router-link>
 
+                <button type="button" class="profile-delete-btn" @click="abrirModalEliminarCuenta">
+                  Eliminar cuenta
+                </button>
                 <button type="button" class="profile-logout" @click="abrirModalCerrarSesionDesdePerfil">
                   Cerrar sesión
                 </button>
@@ -174,11 +176,47 @@
         </div>
       </div>
     </transition>
+
+    <transition name="modal-fade">
+      <div v-if="mostrarModalEliminarCuenta" class="ui-modal-overlay" @click.self="cerrarModalEliminarCuenta">
+        <div class="ui-modal">
+          <h3 class="delete-modal-title">¿Deseas eliminar tu cuenta?</h3>
+          <p>Esta acción es permanente y eliminará todas tus reservas, tours y datos de la plataforma.</p>
+          
+          <div class="delete-confirm-field">
+            <label for="del-pass" class="delete-confirm-label">
+              Introduce tu contraseña para confirmar:
+            </label>
+            <input
+              id="del-pass"
+              type="password"
+              v-model="passwordEliminarCuenta"
+              placeholder="Contraseña"
+              class="delete-confirm-input"
+              @keyup.enter="confirmarEliminarCuenta"
+            />
+            <p v-if="errorEliminarCuenta" class="delete-confirm-error">
+              {{ errorEliminarCuenta }}
+            </p>
+          </div>
+
+          <div class="ui-modal-actions delete-modal-actions">
+            <button class="ui-btn ui-btn-secondary" @click="cerrarModalEliminarCuenta" :disabled="eliminandoCuenta">
+              Cancelar
+            </button>
+            <button class="ui-btn ui-btn-danger" @click="confirmarEliminarCuenta" :disabled="eliminandoCuenta || !passwordEliminarCuenta">
+              {{ eliminandoCuenta ? 'Eliminando...' : 'Eliminar permanentemente' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
 <script>
 import ContactoView from './views/ContactoView.vue';
+import axios from 'axios';
 
 export default {
   name: 'App',
@@ -189,6 +227,10 @@ export default {
     return {
       mostrarModalContacto: false,
       mostrarModalLogout: false,
+      mostrarModalEliminarCuenta: false,
+      passwordEliminarCuenta: '',
+      errorEliminarCuenta: '',
+      eliminandoCuenta: false,
       notificacion: {
         visible: false,
         tipo: 'info',
@@ -291,6 +333,42 @@ export default {
         this.cerrarMenuMovil();
       }
     },
+    abrirModalEliminarCuenta() {
+      this.cerrarMenuPerfil();
+      this.mostrarModalEliminarCuenta = true;
+      this.passwordEliminarCuenta = '';
+      this.errorEliminarCuenta = '';
+    },
+    cerrarModalEliminarCuenta() {
+      this.mostrarModalEliminarCuenta = false;
+      this.passwordEliminarCuenta = '';
+      this.errorEliminarCuenta = '';
+    },
+    async confirmarEliminarCuenta() {
+      if (!this.passwordEliminarCuenta) {
+        this.errorEliminarCuenta = 'Por favor, introduce tu contraseña.';
+        return;
+      }
+      this.eliminandoCuenta = true;
+      this.errorEliminarCuenta = '';
+      try {
+        await axios.post('http://localhost:8000/api/auth/delete-account', {
+          password: this.passwordEliminarCuenta
+        });
+        this.mostrarModalEliminarCuenta = false;
+        this.$store.dispatch('logout');
+        this.$router.push('/login');
+        this.mostrarNotificacion({
+          tipo: 'success',
+          titulo: 'Cuenta eliminada',
+          mensaje: 'Tu cuenta ha sido eliminada correctamente.'
+        });
+      } catch (error) {
+        this.errorEliminarCuenta = error.response?.data?.message || 'Error al eliminar la cuenta.';
+      } finally {
+        this.eliminandoCuenta = false;
+      }
+    },
     abrirModalCerrarSesion() {
       this.cerrarMenuPerfil();
       this.mostrarModalLogout = true;
@@ -310,6 +388,7 @@ export default {
       if (event.key !== 'Escape') return;
       if (this.mostrarModalContacto) this.cerrarModalContacto();
       if (this.mostrarModalLogout) this.mostrarModalLogout = false;
+      if (this.mostrarModalEliminarCuenta) this.cerrarModalEliminarCuenta();
     },
     confirmarCerrarSesion() {
       this.mostrarModalLogout = false;
@@ -711,6 +790,11 @@ body {
   text-shadow: none;
 }
 
+.tour-dropdown,
+.tour-dropdown * {
+  text-shadow: none !important;
+}
+
 .tour-dropdown-label {
   margin: 0 0 0.35rem;
   padding: 0.25rem 0.55rem 0.55rem;
@@ -1046,5 +1130,78 @@ body {
 .profile-fade-leave-to {
   opacity: 0;
   transform: translateY(-4px);
+}
+
+.profile-delete-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  text-decoration: none;
+  color: #9d2030 !important;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  padding: 0.55rem 0.55rem;
+  margin: 0;
+  font-size: 0.93rem;
+  font-weight: 500;
+  text-shadow: none;
+  cursor: pointer;
+}
+
+.profile-delete-btn:hover {
+  background: #fdf2f2;
+}
+
+.ui-btn-danger {
+  background: #9d2030;
+  color: #ffffff;
+}
+
+.ui-btn-danger:hover {
+  background: #7d1a26;
+}
+
+.ui-btn-danger:disabled {
+  background: #e0a3ab;
+  cursor: not-allowed;
+}
+
+.delete-modal-title {
+  color: #9d2030;
+}
+
+.delete-confirm-field {
+  margin-top: 1.25rem;
+}
+
+.delete-confirm-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #2b1b17;
+  margin-bottom: 0.4rem;
+}
+
+.delete-confirm-input {
+  width: 100%;
+  padding: 0.65rem 0.9rem;
+  border: 1px solid #eadfd8;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: #2b1b17;
+  background: #ffffff;
+}
+
+.delete-confirm-error {
+  color: #9d2030;
+  font-size: 0.82rem;
+  margin-top: 0.4rem;
+  font-weight: 500;
+}
+
+.delete-modal-actions {
+  margin-top: 1.5rem;
 }
 </style>
