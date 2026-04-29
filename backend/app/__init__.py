@@ -344,6 +344,15 @@ def create_app():
             db.session.execute(db.text("ALTER TABLE bookings ADD COLUMN payment_method VARCHAR(20) DEFAULT 'reception'"))
             db.session.commit()
 
+        user_columns_result = db.session.execute(db.text("SHOW COLUMNS FROM users"))
+        user_columns = [row[0] for row in user_columns_result]
+        if 'esta_verificado' not in user_columns:
+            db.session.execute(db.text('ALTER TABLE users ADD COLUMN esta_verificado BOOLEAN DEFAULT FALSE'))
+            db.session.commit()
+        if 'token_verificacion' not in user_columns:
+            db.session.execute(db.text('ALTER TABLE users ADD COLUMN token_verificacion VARCHAR(100) NULL'))
+            db.session.commit()
+
         seed_sample_rooms()
 
 

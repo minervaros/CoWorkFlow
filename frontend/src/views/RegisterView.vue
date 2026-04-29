@@ -71,7 +71,7 @@ export default {
         localStorage.setItem('ui-notice', JSON.stringify({
           tipo: 'success',
           titulo: '¡Cuenta creada con éxito!',
-          mensaje: 'Ahora puedes iniciar sesión con tus credenciales.'
+          mensaje: 'Revisa tu correo para completar el registro.'
         }));
 
         // Redirigimos al login
