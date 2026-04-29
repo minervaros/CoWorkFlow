@@ -300,14 +300,17 @@ def create_app():
     app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
     jwt = JWTManager(app)
 
-    # Configuramos la URI de la base de datos usando variables de entorno
-    # mysql+pymysql://usuario:password@host/nombre_db
-    user = 'root'
-    password = os.getenv('DB_ROOT_PASSWORD')
-    host = 'db'
-    dbname = os.getenv('DB_NAME')
+    # Configuramos la URI de la base de datos usando variables de entorno (soporta Clever Cloud y local)
+    # mysql+pymysql://usuario:password@host:port/nombre_db
+    import urllib.parse
+    user = os.getenv('MYSQL_ADDON_USER', 'root')
+    password = os.getenv('MYSQL_ADDON_PASSWORD', os.getenv('DB_ROOT_PASSWORD', ''))
+    host = os.getenv('MYSQL_ADDON_HOST', 'db')
+    port = os.getenv('MYSQL_ADDON_PORT', '3306')
+    dbname = os.getenv('MYSQL_ADDON_DB', os.getenv('DB_NAME'))
     
-    app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{user}:{password}@{host}/{dbname}"
+    safe_password = urllib.parse.quote_plus(password) if password else ''
+    app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{user}:{safe_password}@{host}:{port}/{dbname}"
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY')
 
