@@ -127,13 +127,6 @@
 
       <div class="contenido-metricas">
         <h2>Coworking <br>en Valencia</h2>
-        <p>
-          Adéntrate en nuestros 3.200 m² de zonas de trabajo compartidas, oficinas privadas,
-          modernas salas de reuniones y espacios sorprendentes para eventos. Los nodos de
-          coworking Crea., ubicados en los barrios clave de Valencia, son el punto de
-          encuentro para profesionales, equipos y empresas que buscan tanto flexibilidad
-          como una nueva forma de trabajar y relacionarse. ¡Ven a conocernos!
-        </p>
       </div>
     </section>
   </div>
