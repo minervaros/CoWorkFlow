@@ -261,6 +261,84 @@
             :aria-label="`Ir al grupo ${idx + 1}`"
           ></button>
         </div>
+
+        <!-- Formulario para agregar reseña -->
+        <div class="divisor-resena"></div>
+        
+        <div class="formulario-resena-contenedor">
+          <h3>Déjanos tu opinión</h3>
+          <p class="intro-formulario">¿Eres coworker o has reservado alguna de nuestras salas? Comparte tu experiencia con la comunidad.</p>
+          
+          <form @submit.prevent="publicarResena" class="formulario-resena">
+            <div class="estrellas-selector-wrap">
+              <span class="label-estrellas">Tu valoración:</span>
+              <div class="estrellas-rating">
+                <button
+                  type="button"
+                  v-for="n in 5"
+                  :key="n"
+                  class="estrella-btn"
+                  :class="{ activa: n <= (hoverEstrellas || nuevaResena.estrellas) }"
+                  @mouseenter="hoverEstrellas = n"
+                  @mouseleave="hoverEstrellas = 0"
+                  @click="nuevaResena.estrellas = n"
+                  :aria-label="`Valorar con ${n} estrellas`"
+                >
+                  ★
+                </button>
+              </div>
+            </div>
+
+            <div class="campos-grupo">
+              <div class="campo-item">
+                <label for="resena-autor">Nombre completo</label>
+                <input
+                  id="resena-autor"
+                  v-model="nuevaResena.autor"
+                  type="text"
+                  placeholder="Ej. Laura Gómez"
+                  required
+                />
+              </div>
+
+              <div class="campo-item">
+                <label for="resena-puesto">Puesto / Empresa</label>
+                <input
+                  id="resena-puesto"
+                  v-model="nuevaResena.puesto"
+                  type="text"
+                  placeholder="Ej. Diseñadora Freelance"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="campo-item texto-item">
+              <label for="resena-texto">Comentario</label>
+              <textarea
+                id="resena-texto"
+                v-model="nuevaResena.texto"
+                rows="4"
+                placeholder="Cuéntanos qué es lo que más te gusta de CoWorkFlow..."
+                required
+              ></textarea>
+            </div>
+
+            <div class="acciones-form-resena">
+              <button type="submit" class="btn-publicar" :disabled="publicandoResena">
+                <span v-if="publicandoResena" class="cargando-spinner"></span>
+                <span>Publicar reseña</span>
+              </button>
+            </div>
+
+            <transition name="fade">
+              <div>
+                <p v-if="errorResena" class="resena-error-msg">{{ errorResena }}</p>
+                <p v-else-if="exitoResena" class="resena-success-msg">{{ exitoResena }}</p>
+              </div>
+            </transition>
+          </form>
+        </div>
       </div>
     </section>
 
@@ -286,22 +364,28 @@ export default {
       esMovil: false,
       filtrosMovilAbierto: false,
       slideActual: 0,
-      opiniones: [
-        { id: 1, autor: "Laura Gómez", puesto: "Diseñadora Freelance", texto: "El café de especialidad y la luz natural del Cabanyal cambiaron por completo mi rutina de trabajo. ¡Un 10!", estrellas: 5 },
-        { id: 2, autor: "Carlos Mendoza", puesto: "Tech Lead en Koa", texto: "Espacios modernos, excelente conexión a internet y cabinas privadas para llamadas sin interrupciones. Muy recomendado.", estrellas: 5 },
-        { id: 3, autor: "Sofía Ruiz", puesto: "Consultora de Marketing", texto: "El acceso 24/7 me permite trabajar con clientes de otros husos horarios sin problemas. La seguridad es inmejorable.", estrellas: 5 },
-        { id: 4, autor: "Mateo Silva", puesto: "Emprendedor", texto: "He organizado talleres en la sala de Ruzafa y todos los asistentes quedaron encantados con el diseño y la comodidad.", estrellas: 5 },
-        { id: 5, autor: "Ana Belén", puesto: "Escritora y Editora", texto: "Un ambiente super inspirador, el silencio y el respeto de la comunidad me ayudan a concentrarme al máximo.", estrellas: 5 },
-        { id: 6, autor: "David Pons", puesto: "Desarrollador Web", texto: "El servicio de limpieza diaria mantiene todo impecable. El material tecnológico a disposición es de última generación.", estrellas: 5 },
-        { id: 7, autor: "Elena Ortiz", puesto: "Project Manager", texto: "Llevo 6 meses aquí y no puedo estar más contenta. Las sedes son espectaculares y la comunidad es fantástica.", estrellas: 5 },
-        { id: 8, autor: "Javier Sanz", puesto: "Diseñador de Interiores", texto: "Me encantan los detalles de diseño de cada rincón. Se nota el cariño y el enfoque premium de CoWorkFlow.", estrellas: 5 },
-        { id: 9, autor: "Marta Vidal", puesto: "CEO en Startup", texto: "La flexibilidad de contratar salas de reuniones por horas es clave para nuestro equipo dinámico. Excelente servicio.", estrellas: 5 }
-      ]
+      opiniones: [],
+      nuevaResena: {
+        autor: '',
+        puesto: '',
+        texto: '',
+        estrellas: 5
+      },
+      publicandoResena: false,
+      errorResena: null,
+      exitoResena: null,
+      hoverEstrellas: 0
     }
   },
   mounted() {
     this.actualizarModoMovil();
     window.addEventListener('resize', this.actualizarModoMovil);
+
+    // Si el usuario está logueado, pre-rellenar el autor
+    const userObj = this.$store.getters.getUser;
+    if (userObj && userObj.nombre_completo) {
+      this.nuevaResena.autor = userObj.nombre_completo;
+    }
   },
   beforeUnmount() {
     window.removeEventListener('resize', this.actualizarModoMovil);
@@ -326,6 +410,14 @@ export default {
       console.error("Error al traer salas:", error);
     } finally {
       this.cargando = false;
+    }
+
+    // Traer reseñas desde el backend
+    try {
+      const resenasResponse = await axios.get('http://localhost:8000/api/resenas/');
+      this.opiniones = resenasResponse.data;
+    } catch (error) {
+      console.error("Error al traer reseñas:", error);
     }
   },
   methods: {
@@ -458,6 +550,59 @@ export default {
     },
     irASlide(idx) {
       this.slideActual = idx;
+    },
+    async publicarResena() {
+      this.errorResena = null;
+      this.exitoResena = null;
+
+      if (!this.nuevaResena.autor.trim() || !this.nuevaResena.puesto.trim() || !this.nuevaResena.texto.trim()) {
+        this.errorResena = "Todos los campos son obligatorios.";
+        return;
+      }
+
+      this.publicandoResena = true;
+      try {
+        const respuesta = await axios.post('http://localhost:8000/api/resenas/', {
+          autor: this.nuevaResena.autor,
+          puesto: this.nuevaResena.puesto,
+          texto: this.nuevaResena.texto,
+          estrellas: this.nuevaResena.estrellas
+        });
+
+        this.opiniones.push(respuesta.data.resena);
+        this.exitoResena = "¡Reseña publicada con éxito! Gracias por tu comentario.";
+
+        // Limpiar formulario y restablecer valores
+        this.nuevaResena.texto = '';
+        this.nuevaResena.puesto = '';
+        this.nuevaResena.estrellas = 5;
+
+        const userObj = this.$store.getters.getUser;
+        if (userObj && userObj.nombre_completo) {
+          this.nuevaResena.autor = userObj.nombre_completo;
+        } else {
+          this.nuevaResena.autor = '';
+        }
+
+        // Ir al último slide
+        this.$nextTick(() => {
+          this.slideActual = this.gruposOpiniones.length - 1;
+        });
+
+        setTimeout(() => {
+          this.exitoResena = null;
+        }, 5000);
+
+      } catch (err) {
+        console.error("Error al publicar reseña:", err);
+        if (err.response && err.response.data) {
+          this.errorResena = err.response.data.message || "Error al publicar la reseña.";
+        } else {
+          this.errorResena = "No se pudo conectar con el servidor.";
+        }
+      } finally {
+        this.publicandoResena = false;
+      }
     }
   },
   computed: {
@@ -1502,6 +1647,208 @@ export default {
 .indicador.activo {
   background: #5a3f33;
   transform: scale(1.2);
+}
+
+/* --- DIVISOR Y FORMULARIO DE RESEÑAS --- */
+.divisor-resena {
+  width: min(800px, 100%);
+  height: 1.5px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0%, rgba(90, 63, 51, 0.25) 50%, rgba(255, 255, 255, 0.05) 100%);
+  margin: 3.5rem auto 3rem;
+}
+
+.formulario-resena-contenedor {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2.5rem;
+  background: rgba(253, 248, 244, 0.95);
+  border: 1px solid #eaddd3;
+  border-radius: 20px;
+  box-shadow: 0 12px 36px rgba(43, 27, 23, 0.06);
+  text-align: left;
+  text-shadow: none !important;
+
+  h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    color: #2b1b17;
+    margin: 0 0 0.5rem;
+    font-weight: 600;
+  }
+
+  .intro-formulario {
+    color: #7e6f69;
+    font-size: 0.96rem;
+    margin: 0 0 2rem;
+    line-height: 1.5;
+  }
+}
+
+.formulario-resena {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.estrellas-selector-wrap {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.label-estrellas {
+  font-weight: 600;
+  color: #2b1b17;
+  font-size: 0.95rem;
+}
+
+.estrellas-rating {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.estrella-btn {
+  background: none;
+  border: none;
+  font-size: 1.85rem;
+  color: #e2d7cf;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: transform 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    transform: scale(1.15);
+  }
+
+  &.activa {
+    color: #d48c3f;
+  }
+}
+
+.campos-grupo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+@media (max-width: 600px) {
+  .campos-grupo {
+    grid-template-columns: 1fr;
+  }
+  .formulario-resena-contenedor {
+    padding: 1.5rem;
+  }
+}
+
+.campo-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+
+  label {
+    font-weight: 600;
+    color: #2b1b17;
+    font-size: 0.9rem;
+  }
+
+  input, textarea {
+    width: 100%;
+    padding: 0.78rem 0.95rem;
+    border: 1px solid #e2d7cf;
+    border-radius: 8px;
+    font-size: 0.96rem;
+    font-family: inherit;
+    background-color: white;
+    color: #2b1b17;
+    box-sizing: border-box;
+    transition: border-color 0.25s, box-shadow 0.25s;
+
+    &:focus {
+      outline: none;
+      border-color: #1b4fd6;
+      box-shadow: 0 0 0 3px rgba(27, 79, 214, 0.12);
+    }
+  }
+
+  textarea {
+    resize: vertical;
+  }
+}
+
+.acciones-form-resena {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-publicar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.82rem 1.8rem;
+  background: #362521;
+  color: #fcfaf7;
+  border: none;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.98rem;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(54, 37, 33, 0.15);
+  transition: background-color 0.25s, transform 0.2s, box-shadow 0.25s;
+
+  &:hover:not(:disabled) {
+    background: #4a3530;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(54, 37, 33, 0.25);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+.cargando-spinner {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.resena-error-msg {
+  color: #b42318;
+  font-size: 0.9rem;
+  margin: 0.5rem 0 0;
+  text-align: center;
+  font-weight: 500;
+}
+
+.resena-success-msg {
+  color: #027a48;
+  font-size: 0.9rem;
+  margin: 0.5rem 0 0;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* Transición fade para mensajes */
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
 }
 
 </style>

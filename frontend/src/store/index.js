@@ -5,7 +5,10 @@ export default createStore({
     token: localStorage.getItem('user-token') || '',
     refreshToken: localStorage.getItem('user-refresh-token') || '',
     user: localStorage.getItem('user-email')
-      ? { email: localStorage.getItem('user-email') }
+      ? {
+          email: localStorage.getItem('user-email'),
+          nombre_completo: localStorage.getItem('user-nombre-completo') || ''
+        }
       : null,
     // Añadimos el rol al estado para que Vuex también lo sepa
     role: localStorage.getItem('user-role') || ''
@@ -52,6 +55,7 @@ export default createStore({
         localStorage.setItem('user-refresh-token', payload.refreshToken);
       }
       localStorage.setItem('user-email', payload.user?.email || '');
+      localStorage.setItem('user-nombre-completo', payload.user?.nombre_completo || '');
       localStorage.setItem('user-role', payload.user.role);
     },
     logout({ commit }) {
@@ -60,6 +64,7 @@ export default createStore({
       localStorage.removeItem('user-refresh-token');
       localStorage.removeItem('user-last-activity');
       localStorage.removeItem('user-email');
+      localStorage.removeItem('user-nombre-completo');
       localStorage.removeItem('user-role');
       commit('LOGOUT');
     }

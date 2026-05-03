@@ -87,3 +87,17 @@ class TourBooking(db.Model):
 
     def __repr__(self):
         return f'<TourBooking User:{self.user_id} Sede:{self.sede_slug}>'
+
+
+class Review(db.Model):
+    __tablename__ = 'reviews'
+
+    id = db.Column(db.Integer, primary_key=True)
+    author = db.Column(db.String(100), nullable=False)
+    position = db.Column(db.String(100), nullable=False)
+    text = db.Column(db.Text, nullable=False)
+    rating = db.Column(db.Integer, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    def __repr__(self):
+        return f'<Review {self.id} Author:{self.author}>'

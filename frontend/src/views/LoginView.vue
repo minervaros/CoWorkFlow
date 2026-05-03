@@ -76,6 +76,7 @@ export default {
           refreshToken: respuesta.data.refresh_token,
           user: {
             email: this.email,
+            nombre_completo: respuesta.data.user.full_name || '',
             role: respuesta.data.user.role // Si tu backend lo devuelve
           }
         });

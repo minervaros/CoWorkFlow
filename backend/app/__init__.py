@@ -289,6 +289,41 @@ def seed_sample_rooms():
 
     db.session.commit()
 
+
+def semillar_resenas():
+    from app.models import Review
+
+    opiniones_muestra = [
+        { "autor": "Laura Gómez", "puesto": "Diseñadora Freelance", "texto": "El café de especialidad y la luz natural del Cabanyal cambiaron por completo mi rutina de trabajo. ¡Un 10!", "estrellas": 5 },
+        { "autor": "Carlos Mendoza", "puesto": "Tech Lead en Koa", "texto": "Espacios modernos, excelente conexión a internet y cabinas privadas para llamadas sin interrupciones. Muy recomendado.", "estrellas": 5 },
+        { "autor": "Sofía Ruiz", "puesto": "Consultora de Marketing", "texto": "El acceso 24/7 me permite trabajar con clientes de otros husos horarios sin problemas. La seguridad es inmejorable.", "estrellas": 5 },
+        { "autor": "Mateo Silva", "puesto": "Emprendedor", "texto": "He organizado talleres en la sala de Ruzafa y todos los asistentes quedaron encantados con el diseño y la comodidad.", "estrellas": 5 },
+        { "autor": "Ana Belén", "puesto": "Escritora y Editora", "texto": "Un ambiente super inspirador, el silencio y el respeto de la comunidad me ayudan a concentrarme al máximo.", "estrellas": 5 },
+        { "autor": "David Pons", "puesto": "Desarrollador Web", "texto": "El servicio de limpieza diaria mantiene todo impecable. El material tecnológico a disposición es de última generación.", "estrellas": 5 },
+        { "autor": "Elena Ortiz", "puesto": "Project Manager", "texto": "Llevo 6 meses aquí y no puedo estar más contenta. Las sedes son espectaculares y la comunidad es fantástica.", "estrellas": 5 },
+        { "autor": "Javier Sanz", "puesto": "Diseñador de Interiores", "texto": "Me encantan los detalles de diseño de cada rincón. Se nota el cariño y el enfoque premium de CoWorkFlow.", "estrellas": 5 },
+        { "autor": "Marta Vidal", "puesto": "CEO en Startup", "texto": "La flexibilidad de contratar salas de reuniones por horas es clave para nuestro equipo dinámico. Excelente servicio.", "estrellas": 5 }
+    ]
+
+    try:
+        if db.session.query(Review).count() == 0:
+            nuevas = [
+                Review(
+                    author=op["autor"],
+                    position=op["puesto"],
+                    text=op["texto"],
+                    rating=op["estrellas"]
+                )
+                for op in opiniones_muestra
+            ]
+            db.session.add_all(nuevas)
+            db.session.commit()
+            print("Reseñas de muestra insertadas con éxito.")
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error al semillar reseñas: {str(e)}")
+
+
 def create_app():
 
     app = Flask(__name__)
@@ -354,6 +389,7 @@ def create_app():
             db.session.commit()
 
         seed_sample_rooms()
+        semillar_resenas()
 
 
     @app.route('/')
@@ -384,6 +420,10 @@ def create_app():
     # Registramos el Blueprint de contacto (formulario + envío SMTP)
     from app.contact import contact_bp
     app.register_blueprint(contact_bp, url_prefix='/api/contact')
+
+    # Registramos el Blueprint de reseñas (comentarios/opiniones)
+    from app.resenas import resenas_bp
+    app.register_blueprint(resenas_bp, url_prefix='/api/resenas')
 
     return app
 

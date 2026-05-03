@@ -128,3 +128,18 @@ Authorization: Bearer TU_TOKEN_JWT_AQUI
   "password": "newpassword123"
 }
 
+
+### Listar reseñas
+GET http://localhost:8000/api/resenas/
+
+### Crear una nueva reseña
+POST http://localhost:8000/api/resenas/
+Content-Type: application/json
+
+{
+    "autor": "Usuario de Prueba",
+    "puesto": "Desarrollador Fullstack",
+    "texto": "Me encantan las salas de Ruzafa, tienen una vibra increíble y el café es de primera.",
+    "estrellas": 5
+}
+
