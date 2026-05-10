@@ -109,3 +109,22 @@ Content-Type: application/json
   "mensaje": "Hola, necesito cambiar la hora de mi reserva del martes."
 }
 
+### Cambiar contraseña (Requiere Token JWT en la cabecera)
+POST http://localhost:8000/api/auth/change-password
+Content-Type: application/json
+Authorization: Bearer TU_TOKEN_JWT_AQUI
+
+{
+  "current_password": "password123",
+  "new_password": "newpassword123"
+}
+
+### Eliminar cuenta (Requiere Token JWT en la cabecera)
+POST http://localhost:8000/api/auth/delete-account
+Content-Type: application/json
+Authorization: Bearer TU_TOKEN_JWT_AQUI
+
+{
+  "password": "newpassword123"
+}
+

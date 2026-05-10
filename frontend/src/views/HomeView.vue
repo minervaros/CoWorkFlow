@@ -5,7 +5,12 @@
     </header>
 
     <section class="selector-barrios">
-      <p>Elige una sede para ver las salas disponibles de ese barrio.</p>
+      <div class="intro-sedes">
+        <span class="intro-kicker"> ESPACIOS CON IDENTIDAD PROPIA </span>
+        <h2>Cuatro atmósferas urbanas. Tú eliges la <em>energía</em> de hoy.</h2>
+      </div>
+
+      <div class="intro-separador" aria-hidden="true"></div>
 
       <div class="grid-barrios">
         <article
@@ -26,138 +31,239 @@
         </article>
       </div>
 
-      <div v-if="sedeActiva" class="acciones-barrio">
-        <button type="button" class="btn-limpiar-sede" @click="limpiarSede">
-          Mostrar todas las sedes
-        </button>
+      <div v-if="sedeActiva" ref="catalogoPrincipal" class="contenedor-principal">
+        <h2 class="titulo-catalogo-sede">Salas de {{ nombreSedeActiva }}</h2>
+        <div class="catalogo-layout">
+          <aside class="sidebar-filtros">
+            <button
+              type="button"
+              class="filtros-mobile-toggle"
+              @click="toggleFiltrosMovil"
+              :aria-expanded="mostrarPanelFiltros ? 'true' : 'false'"
+            >
+              {{ mostrarPanelFiltros ? 'Ocultar filtros' : 'Mostrar filtros' }}
+            </button>
+
+            <transition name="desplegable-filtros">
+              <div v-show="mostrarPanelFiltros" class="panel-filtro">
+              <div class="sidebar-header sidebar-header-principal">
+                <h3>Filtros</h3>
+              </div>
+
+              <div class="grupo-filtro">
+                <label>Buscar sala</label>
+                <input v-model="busquedaNombre" type="text" placeholder="Ej: Sala de Juntas, Podcast..." />
+              </div>
+
+              <div class="grupo-filtro">
+                <label>Capacidad mínima</label>
+                <select v-model.number="capacidadMinima">
+                  <option value="0">Cualquier capacidad</option>
+                  <option value="2">Para 2+ personas</option>
+                  <option value="5">Para 5+ personas</option>
+                  <option value="10">Para 10+ personas</option>
+                  <option value="15">Para 15+ personas</option>
+                  <option value="20">Para 20+ personas</option>
+                  <option value="30">Para 30+ personas</option>
+                </select>
+              </div>
+
+              <div class="grupo-filtro grupo-filtro-ubicacion">
+                <label>Ubicación</label>
+                <select
+                  v-model="ubicacionSeleccionada"
+                  :disabled="Boolean(sedeActiva)"
+                  @change="sincronizarSedeDesdeSelector"
+                >
+                  <option value="">Todas las ubicaciones</option>
+                  <option v-for="ubicacion in ubicacionesDisponibles" :key="ubicacion" :value="ubicacion">
+                    {{ ubicacion }}
+                  </option>
+                </select>
+                <p v-if="sedeActiva" class="nota-filtro-bloqueado">
+                  La sede activa se controla desde las tarjetas superiores.
+                </p>
+              </div>
+
+              <div class="sidebar-header">
+                <h3>Equipación</h3>
+                <button
+                  v-if="equipamientosSeleccionados.length"
+                  type="button"
+                  class="limpiar-equipamiento"
+                  @click="equipamientosSeleccionados = []"
+                >
+                  Limpiar
+                </button>
+              </div>
+
+              <div class="equipamiento-filtro">
+                <label v-for="equipamiento in equipamientosDisponibles" :key="equipamiento" class="equipamiento-opcion">
+                  <input v-model="equipamientosSeleccionados" type="checkbox" :value="equipamiento" />
+                  <span>{{ equipamiento }}</span>
+                </label>
+                <p v-if="!equipamientosDisponibles.length" class="sin-opciones">No hay equipación disponible.</p>
+              </div>
+              </div>
+            </transition>
+          </aside>
+
+          <section class="contenido-catalogo">
+            <div v-if="cargando" class="spinner">Cargando salas disponibles...</div>
+            
+            <div v-else-if="salasVisibles.length === 0" class="sin-salas">
+              <p>No hay salas disponibles en este momento. Vuelve más tarde.</p>
+            </div>
+
+            <div v-else class="grid-salas">
+              <article
+                v-for="sala in salasVisibles"
+                :key="sala.id"
+                class="tarjeta-sala"
+              >
+
+                <img 
+                  :src="sala.image_url || defaultRoomImage" 
+                  alt="Foto de la sala" 
+                  class="sala-imagen"
+                  @error="handleRoomImageError"
+                />
+
+                <div class="info-sala">
+                  <h3>{{ sala.name }}</h3>
+                  <p>{{ sala.description }}</p>
+                  <p class="ubicacion">📍 {{ sala.location || 'Ubicación no definida' }}</p>
+                  <div v-if="(sala.equipamiento || []).length" class="equipaciones">
+                    <span v-for="item in sala.equipamiento" :key="`${sala.id}-${item}`" class="equipacion-pill">{{ item }}</span>
+                  </div>
+                  <div class="detalles">
+                    <span>👤 Capacidad: {{ sala.capacity }}</span>
+                  </div>
+                  <div class="acciones-sala">
+                    <span class="precio">{{ sala.price_per_hour }}€/h</span>
+                    <div class="acciones-botones">
+                      <button @click.stop="irAReservar(sala)" class="boton-ver">
+                        Reservar ahora
+                      </button>
+                      <button @click="irADetalle(sala)" class="boton-info">
+                        Más info
+                        <span class="icono-flecha" aria-hidden="true">→</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </section>
+        </div>
       </div>
     </section>
 
-    <div v-if="sedeActiva" ref="catalogoPrincipal" class="contenedor-principal">
-      <div class="catalogo-layout">
-        <aside class="sidebar-filtros">
-          <button
-            type="button"
-            class="filtros-mobile-toggle"
-            @click="toggleFiltrosMovil"
-            :aria-expanded="mostrarPanelFiltros ? 'true' : 'false'"
-          >
-            {{ mostrarPanelFiltros ? 'Ocultar filtros' : 'Mostrar filtros' }}
-          </button>
-
-          <transition name="desplegable-filtros">
-            <div v-show="mostrarPanelFiltros" class="panel-filtro">
-            <div class="sidebar-header sidebar-header-principal">
-              <h3>Filtros</h3>
-            </div>
-
-            <div class="grupo-filtro">
-              <label>Buscar sala</label>
-              <input v-model="busquedaNombre" type="text" placeholder="Ej: Sala de Juntas, Podcast..." />
-            </div>
-
-            <div class="grupo-filtro">
-              <label>Capacidad mínima</label>
-              <select v-model.number="capacidadMinima">
-                <option value="0">Cualquier capacidad</option>
-                <option value="2">Para 2+ personas</option>
-                <option value="5">Para 5+ personas</option>
-                <option value="10">Para 10+ personas</option>
-                <option value="15">Para 15+ personas</option>
-                <option value="20">Para 20+ personas</option>
-                <option value="30">Para 30+ personas</option>
-              </select>
-            </div>
-
-            <div class="grupo-filtro grupo-filtro-ubicacion">
-              <label>Ubicación</label>
-              <select
-                v-model="ubicacionSeleccionada"
-                :disabled="Boolean(sedeActiva)"
-                @change="sincronizarSedeDesdeSelector"
-              >
-                <option value="">Todas las ubicaciones</option>
-                <option v-for="ubicacion in ubicacionesDisponibles" :key="ubicacion" :value="ubicacion">
-                  {{ ubicacion }}
-                </option>
-              </select>
-              <p v-if="sedeActiva" class="nota-filtro-bloqueado">
-                La sede activa se controla desde las tarjetas superiores.
-              </p>
-            </div>
-
-            <div class="sidebar-header">
-              <h3>Equipación</h3>
-              <button
-                v-if="equipamientosSeleccionados.length"
-                type="button"
-                class="limpiar-equipamiento"
-                @click="equipamientosSeleccionados = []"
-              >
-                Limpiar
-              </button>
-            </div>
-
-            <div class="equipamiento-filtro">
-              <label v-for="equipamiento in equipamientosDisponibles" :key="equipamiento" class="equipamiento-opcion">
-                <input v-model="equipamientosSeleccionados" type="checkbox" :value="equipamiento" />
-                <span>{{ equipamiento }}</span>
-              </label>
-              <p v-if="!equipamientosDisponibles.length" class="sin-opciones">No hay equipación disponible.</p>
-            </div>
-            </div>
-          </transition>
-        </aside>
-
-        <section class="contenido-catalogo">
-          <div v-if="cargando" class="spinner">Cargando salas disponibles...</div>
-          
-          <div v-else-if="salasVisibles.length === 0" class="sin-salas">
-            <p>No hay salas disponibles en este momento. Vuelve más tarde.</p>
+    <!-- Sección ¿Por qué elegirnos? -->
+    <section class="elegirnos-section">
+      <div class="elegirnos-inner">
+        <h2>¿Por qué elegirnos?</h2>
+        <div class="elegirnos-grid">
+          <div class="caja-elegirnos">
+            <i class="fa-solid fa-mug-hot icono-elegirnos" aria-hidden="true"></i>
+            <span class="concepto-elegirnos">Café de especialidad</span>
           </div>
+          <div class="caja-elegirnos">
+            <i class="fa-solid fa-laptop icono-elegirnos" aria-hidden="true"></i>
+            <span class="concepto-elegirnos">Material necesario para clientes</span>
+          </div>
+          <div class="caja-elegirnos">
+            <i class="fa-solid fa-key icono-elegirnos" aria-hidden="true"></i>
+            <span class="concepto-elegirnos">Acceso 24/7</span>
+          </div>
+          <div class="caja-elegirnos">
+            <i class="fa-solid fa-broom icono-elegirnos" aria-hidden="true"></i>
+            <span class="concepto-elegirnos">Limpieza diaria</span>
+          </div>
+          <div class="caja-elegirnos">
+            <i class="fa-solid fa-user-group icono-elegirnos" aria-hidden="true"></i>
+            <span class="concepto-elegirnos">Networking mensual</span>
+          </div>
+          <div class="caja-elegirnos">
+            <i class="fa-solid fa-video icono-elegirnos" aria-hidden="true"></i>
+            <span class="concepto-elegirnos">Cámaras de seguridad</span>
+          </div>
+          <div class="caja-elegirnos">
+            <i class="fa-solid fa-wifi icono-elegirnos" aria-hidden="true"></i>
+            <span class="concepto-elegirnos">Internet de alta velocidad</span>
+          </div>
+          <div class="caja-elegirnos">
+            <i class="fa-solid fa-headset icono-elegirnos" aria-hidden="true"></i>
+            <span class="concepto-elegirnos">Soporte en recepción</span>
+          </div>
+        </div>
+      </div>
+    </section>
 
-          <div v-else class="grid-salas">
-            <article
-              v-for="sala in salasVisibles"
-              :key="sala.id"
-              class="tarjeta-sala"
-            >
-
-              <img 
-                :src="sala.image_url || defaultRoomImage" 
-                alt="Foto de la sala" 
-                class="sala-imagen"
-                @error="handleRoomImageError"
-              />
-
-              <div class="info-sala">
-                <h3>{{ sala.name }}</h3>
-                <p>{{ sala.description }}</p>
-                <p class="ubicacion">📍 {{ sala.location || 'Ubicación no definida' }}</p>
-                <div v-if="(sala.equipamiento || []).length" class="equipaciones">
-                  <span v-for="item in sala.equipamiento" :key="`${sala.id}-${item}`" class="equipacion-pill">{{ item }}</span>
-                </div>
-                <div class="detalles">
-                  <span>👤 Capacidad: {{ sala.capacity }}</span>
-                </div>
-                <div class="acciones-sala">
-                  <span class="precio">{{ sala.price_per_hour }}€/h</span>
-                  <div class="acciones-botones">
-                    <button @click.stop="irAReservar(sala)" class="boton-ver">
-                      Reservar ahora
-                    </button>
-                    <button @click="irADetalle(sala)" class="boton-info">
-                      Más info
-                      <span class="icono-flecha" aria-hidden="true">→</span>
-                    </button>
+    <!-- Sección de Opiniones / Testimonios -->
+    <section class="opiniones-section">
+      <div class="opiniones-inner">
+        <h2>Opiniones de nuestros coworkers</h2>
+        
+        <div class="carrusel-wrapper">
+          <button 
+            type="button" 
+            class="carrusel-control prev" 
+            @click="anteriorSlide" 
+            :disabled="slideActual === 0"
+            aria-label="Opiniones anteriores"
+          >
+            ‹
+          </button>
+          
+          <div class="carrusel-contenedor">
+            <div class="carrusel-track" :style="{ transform: `translateX(-${slideActual * 100}%)` }">
+              <div 
+                class="carrusel-slide" 
+                v-for="(grupo, idx) in gruposOpiniones" 
+                :key="idx"
+              >
+                <div 
+                  class="caja-opinion" 
+                  v-for="opinion in grupo" 
+                  :key="opinion.id"
+                >
+                  <div class="estrellas">
+                    <span v-for="n in opinion.estrellas" :key="n">★</span>
+                  </div>
+                  <p class="opinion-texto">"{{ opinion.texto }}"</p>
+                  <div class="opinion-autor">
+                    <strong>{{ opinion.autor }}</strong>
+                    <span>{{ opinion.puesto }}</span>
                   </div>
                 </div>
               </div>
-            </article>
+            </div>
           </div>
-        </section>
+
+          <button 
+            type="button" 
+            class="carrusel-control next" 
+            @click="siguienteSlide" 
+            :disabled="slideActual === gruposOpiniones.length - 1"
+            aria-label="Opiniones siguientes"
+          >
+            ›
+          </button>
+        </div>
+
+        <div class="carrusel-indicadores">
+          <button 
+            v-for="(grupo, idx) in gruposOpiniones" 
+            :key="idx" 
+            :class="['indicador', { activo: slideActual === idx }]"
+            @click="irASlide(idx)"
+            :aria-label="`Ir al grupo ${idx + 1}`"
+          ></button>
+        </div>
       </div>
-    </div>
+    </section>
+
   </div>
 </template>
 
@@ -178,7 +284,19 @@ export default {
       defaultRoomImage: 'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=500',
       cargando: true,
       esMovil: false,
-      filtrosMovilAbierto: false
+      filtrosMovilAbierto: false,
+      slideActual: 0,
+      opiniones: [
+        { id: 1, autor: "Laura Gómez", puesto: "Diseñadora Freelance", texto: "El café de especialidad y la luz natural del Cabanyal cambiaron por completo mi rutina de trabajo. ¡Un 10!", estrellas: 5 },
+        { id: 2, autor: "Carlos Mendoza", puesto: "Tech Lead en Koa", texto: "Espacios modernos, excelente conexión a internet y cabinas privadas para llamadas sin interrupciones. Muy recomendado.", estrellas: 5 },
+        { id: 3, autor: "Sofía Ruiz", puesto: "Consultora de Marketing", texto: "El acceso 24/7 me permite trabajar con clientes de otros husos horarios sin problemas. La seguridad es inmejorable.", estrellas: 5 },
+        { id: 4, autor: "Mateo Silva", puesto: "Emprendedor", texto: "He organizado talleres en la sala de Ruzafa y todos los asistentes quedaron encantados con el diseño y la comodidad.", estrellas: 5 },
+        { id: 5, autor: "Ana Belén", puesto: "Escritora y Editora", texto: "Un ambiente super inspirador, el silencio y el respeto de la comunidad me ayudan a concentrarme al máximo.", estrellas: 5 },
+        { id: 6, autor: "David Pons", puesto: "Desarrollador Web", texto: "El servicio de limpieza diaria mantiene todo impecable. El material tecnológico a disposición es de última generación.", estrellas: 5 },
+        { id: 7, autor: "Elena Ortiz", puesto: "Project Manager", texto: "Llevo 6 meses aquí y no puedo estar más contenta. Las sedes son espectaculares y la comunidad es fantástica.", estrellas: 5 },
+        { id: 8, autor: "Javier Sanz", puesto: "Diseñador de Interiores", texto: "Me encantan los detalles de diseño de cada rincón. Se nota el cariño y el enfoque premium de CoWorkFlow.", estrellas: 5 },
+        { id: 9, autor: "Marta Vidal", puesto: "CEO en Startup", texto: "La flexibilidad de contratar salas de reuniones por horas es clave para nuestro equipo dinámico. Excelente servicio.", estrellas: 5 }
+      ]
     }
   },
   mounted() {
@@ -327,9 +445,37 @@ export default {
         path: '/reservas',
         query: { sala: sala.id, nombre: sala.name }
       });
+    },
+    siguienteSlide() {
+      if (this.slideActual < this.gruposOpiniones.length - 1) {
+        this.slideActual++;
+      }
+    },
+    anteriorSlide() {
+      if (this.slideActual > 0) {
+        this.slideActual--;
+      }
+    },
+    irASlide(idx) {
+      this.slideActual = idx;
     }
   },
   computed: {
+    nombreSedeActiva() {
+      if (!this.sedeActiva) return '';
+
+      const sede = this.sedesMapeadas.find(item => item.location === this.sedeActiva);
+      if (sede?.barrio) return sede.barrio;
+
+      return this.sedeActiva;
+    },
+    gruposOpiniones() {
+      const grupos = [];
+      for (let i = 0; i < this.opiniones.length; i += 3) {
+        grupos.push(this.opiniones.slice(i, i + 3));
+      }
+      return grupos;
+    },
     mostrarPanelFiltros() {
       return !this.esMovil || this.filtrosMovilAbierto;
     },
@@ -385,6 +531,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css');
+
 .home {
   min-height: 100vh;
   height: auto;
@@ -396,20 +544,40 @@ export default {
 
 .hero {
   background: transparent;
-  color: #fcfaf7;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.75);
-  padding: 5.25rem 2rem 2.25rem;
+  color: #2b1b17;
+  text-shadow: none;
+  padding: 5.25rem 2rem 1.8rem;
   text-align: center;
   flex-shrink: 0;
 }
 
-.hero h1 {
-  font-family: 'Playfair Display', serif;
-  font-size: 4.5rem;
-  font-weight: 400;
-  letter-spacing: -0.02em;
-  margin-bottom: 1.5rem;
-  line-height: 1.2;
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.35rem, 5vw, 4.5rem);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    margin: 0 auto;
+    margin-bottom: 30px;
+    line-height: 1.2;
+    max-width: none;
+    width: fit-content;
+    color: #fff;
+    text-shadow: 0 8px 48px rgba(0,0,0,0.95), 0 2px 8px #000, 0 1px 0 #000;
+    border: 2.5px solid #fff;
+    border-radius: 1.8em;
+    padding: 0.25em 1.2em;
+    display: inline-block;
+    background: rgba(0,0,0,0.10);
+    box-shadow: 0 2px 16px 0 rgba(0,0,0,0.18);
+  }
+
+.hero h1::after {
+  content: '';
+  display: block;
+  width: min(380px, 72vw);
+  height: 1px;
+  margin: 1rem auto 0;
+  background: linear-gradient(90deg, rgba(122, 90, 74, 0.06), rgba(122, 90, 74, 0.55), rgba(122, 90, 74, 0.06));
 }
 
 .hero h1 em {
@@ -419,37 +587,82 @@ export default {
 }
 
 .selector-barrios {
-  max-width: 1320px;
+  max-width: 100%;
   margin: 0 auto;
   width: 100%;
   padding: 0 1.25rem 1.5rem;
-  color: #f7f2ee;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.55);
+  color: #2b1b17;
+  text-shadow: none;
+}
 
-  h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 2rem;
-    margin-bottom: 0.35rem;
+.intro-sedes {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1rem;
+  margin: 0 auto 1.25rem;
+  width: 100%;
+}
+
+.intro-kicker {
+  display: inline-block;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 6px 32px rgba(0,0,0,0.95), 0 2px 8px #000, 0 1px 0 #000;
+}
+
+  .intro-sedes h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.9rem, 2.7vw, 2.85rem);
+  line-height: 1.22;
+  margin: 0;
+    color: #fff;
     font-weight: 500;
-  }
+    max-width: none;
+    width: 100%;
+    text-shadow: 0 8px 48px rgba(0,0,0,0.95), 0 2px 8px #000, 0 1px 0 #000;
+}
 
-  > p {
-    display: inline-block;
-    color: #fffaf6;
-    font-size: 1.2rem;
-    font-weight: 400;
-    letter-spacing: 0.01em;
-    margin: 0 0 2rem;
-    padding: 0.45rem 0.9rem;
-    border-radius: 999px;
-    border: 2px solid rgba(255, 255, 255, 0.45);
-  }
+.intro-sedes h2 em {
+  font-style: italic;
+  font-weight: 400;
+}
+
+.intro-descripcion {
+  margin: 0;
+  color: #5b4a44;
+  font-size: 1.02rem;
+  line-height: 1.78;
+  text-shadow: none;
+  max-width: none;
+  width: 100%;
+}
+
+.intro-separador {
+  width: min(1140px, 100%);
+  height: 2.5px;
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.08) 0%,
+    rgba(255,255,255,0.85) 40%,
+    rgba(255,255,255,0.08) 100%
+  );
+  margin: 0 auto 1.5rem;
+  box-shadow: 0 2px 16px 0 rgba(0,0,0,0.45);
 }
 
 .grid-barrios {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.9rem;
+  column-gap: 3.2rem;
+  row-gap: 2.65rem;
+  margin: 4rem auto 0;
+  max-width: 1380px;
 }
 
 .tarjeta-barrio {
@@ -549,9 +762,9 @@ export default {
 }
 
 .btn-limpiar-sede {
-  border: 1px solid rgba(255, 255, 255, 0.75);
-  color: #fff;
-  background: transparent;
+  border: 1px solid #c8b2a6;
+  color: #4c3a33;
+  background: rgba(255, 255, 255, 0.65);
   border-radius: 999px;
   padding: 0.45rem 0.95rem;
   cursor: pointer;
@@ -573,11 +786,27 @@ export default {
 .contenedor-principal {
   max-width: 1320px;
   margin: 0 auto;
-  padding: 2rem 1.25rem;
+  padding: 6.75rem 1.25rem 2rem;
   width: 100%;
   min-height: auto;
   overflow: visible;
 }
+
+  .titulo-catalogo-sede {
+    margin: 0 0 1.15rem;
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.65rem, 2.3vw, 2.4rem);
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: -0.01em;
+    text-shadow: 0 8px 48px rgba(0,0,0,0.95), 0 2px 8px #000, 0 1px 0 #000;
+    border: 2.5px solid #fff;
+    border-radius: 1.8em;
+    padding: 0.25em 1.2em;
+    display: inline-block;
+    background: rgba(0,0,0,0.10);
+    box-shadow: 0 2px 16px 0 rgba(0,0,0,0.18);
+  }
 
 .catalogo-layout {
   display: grid;
@@ -964,6 +1193,7 @@ export default {
 
   .grid-barrios {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: 100%;
   }
 
   .sidebar-filtros {
@@ -1028,13 +1258,250 @@ export default {
     font-size: 2.35rem;
   }
 
-  .selector-barrios h2 {
-    font-size: 1.4rem;
+  .intro-sedes h2 {
+    font-size: 1.7rem;
+  }
+
+  .intro-descripcion {
+    font-size: 0.97rem;
+    line-height: 1.7;
   }
 
   .grid-barrios {
     grid-template-columns: 1fr;
   }
+}
+
+@media (max-width: 900px) {
+  .intro-descripcion {
+    max-width: 100%;
+    font-size: 0.97rem;
+    line-height: 1.65;
+  }
+}
+
+/* --- SECCIÓN ¿POR QUÉ ELEGIRNOS? --- */
+.elegirnos-section {
+  max-width: 80%;
+  margin: 6rem auto 0;
+  width: 100%;
+  padding: 0 1.25rem;
+  text-align: center;
+  color: #2b1b17;
+  text-shadow: none;
+}
+  .elegirnos-inner h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+    color: #fff;
+    text-shadow: 0 8px 48px rgba(0,0,0,0.95), 0 2px 8px #000, 0 1px 0 #000;
+}
+
+.elegirnos-inner h2::before,
+.elegirnos-inner h2::after {
+  content: '';
+  height: 2.5px;
+  flex: 1 1 220px;
+  max-width: 360px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.85) 40%, rgba(255,255,255,0.08) 100%);
+  box-shadow: 0 2px 16px 0 rgba(0,0,0,0.45);
+}
+.elegirnos-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+@media (max-width: 900px) {
+  .elegirnos-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .elegirnos-inner h2::before,
+  .elegirnos-inner h2::after {
+    max-width: 90px;
+  }
+
+  .elegirnos-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.caja-elegirnos {
+  padding: 2rem 1.5rem;
+  border: 1px solid #4b3a33;
+  background: rgba(247, 243, 237, 0.97);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 8px 8px 0 rgba(43, 27, 23, 0.1);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+  text-shadow: none !important;
+}
+.caja-elegirnos:hover {
+  transform: translateY(-5px);
+  box-shadow: 12px 12px 20px rgba(43, 27, 23, 0.2);
+  background: #ffffff;
+}
+.icono-elegirnos {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: #7a5849;
+}
+.concepto-elegirnos {
+  font-family: 'Playfair Display', serif;
+  color: #2b1b17;
+  font-size: 1.16rem;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+/* --- SECCIÓN OPINIONES (CARRUSEL DE TRES EN TRES) --- */
+.opiniones-section {
+  max-width: 1320px;
+  margin: 4rem auto 4rem;
+  width: 100%;
+  padding: 4rem 1.25rem;
+  text-align: center;
+  color: #2b1b17;
+  text-shadow: none;
+}
+  .opiniones-inner h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem;
+  margin-bottom: 2.5rem;
+  font-weight: 600;
+    color: #fff;
+    text-shadow: 0 8px 48px rgba(0,0,0,0.95), 0 2px 8px #000, 0 1px 0 #000;
+}
+.carrusel-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+}
+.carrusel-contenedor {
+  overflow: hidden;
+  width: 100%;
+}
+.carrusel-track {
+  display: flex;
+  transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+  width: 100%;
+}
+.carrusel-slide {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+  flex-shrink: 0;
+  padding: 0.5rem;
+}
+@media (max-width: 900px) {
+  .carrusel-slide {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+.caja-opinion {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 16px;
+  padding: 2.2rem 1.8rem;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 8px 32px 0 rgba(31, 15, 10, 0.15);
+  transition: transform 0.3s ease, border-color 0.3s ease;
+  text-shadow: none !important;
+  color: #2b1b17;
+  background-color: rgba(253, 248, 244, 0.95);
+}
+.caja-opinion:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+.estrellas {
+  color: #d48c3f;
+  font-size: 1.1rem;
+  margin-bottom: 0.85rem;
+}
+.opinion-texto {
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #4b3b35;
+  margin-bottom: 1.5rem;
+  font-style: italic;
+  min-height: auto !important;
+}
+.opinion-autor {
+  display: flex;
+  flex-direction: column;
+}
+.opinion-autor strong {
+  font-size: 1.05rem;
+  color: #1e110c;
+}
+.opinion-autor span {
+  font-size: 0.82rem;
+  color: #8c7367;
+  margin-top: 0.15rem;
+}
+.carrusel-control {
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid #d8c6bb;
+  color: #5a3f33;
+  font-size: 2rem;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.25s, transform 0.25s;
+  backdrop-filter: blur(4px);
+  user-select: none;
+}
+.carrusel-control:hover:not(:disabled) {
+  background: #ffffff;
+  transform: scale(1.05);
+}
+.carrusel-control:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.carrusel-indicadores {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+.indicador {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  border: none;
+  background: rgba(84, 55, 43, 0.3);
+  cursor: pointer;
+  transition: background 0.25s, transform 0.25s;
+}
+.indicador.activo {
+  background: #5a3f33;
+  transform: scale(1.2);
 }
 
 </style>

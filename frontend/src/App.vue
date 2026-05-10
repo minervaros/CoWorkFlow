@@ -93,11 +93,13 @@
                   <strong>{{ usuarioEmailMostrado }}</strong>
                 </div>
 
-                <router-link to="/perfil" @click="cerrarMenuPerfil(); cerrarMenuMovil()">Mi perfil</router-link>
                 <router-link to="/mis-reservas" @click="cerrarMenuPerfil(); cerrarMenuMovil()">Mis reservas</router-link>
                 <router-link to="/favoritos" @click="cerrarMenuPerfil(); cerrarMenuMovil()">Favoritos</router-link>
                 <router-link to="/configuracion" @click="cerrarMenuPerfil(); cerrarMenuMovil()">Configuración</router-link>
 
+                <button type="button" class="profile-delete-btn" @click="abrirModalEliminarCuenta">
+                  Eliminar cuenta
+                </button>
                 <button type="button" class="profile-logout" @click="abrirModalCerrarSesionDesdePerfil">
                   Cerrar sesión
                 </button>
@@ -127,13 +129,13 @@
             <svg viewBox="0 0 24 24" role="img" aria-hidden="true">
               <path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2zm0 1.5A4.25 4.25 0 0 0 3.5 7.75v8.5a4.25 4.25 0 0 0 4.25 4.25h8.5a4.25 4.25 0 0 0 4.25-4.25v-8.5a4.25 4.25 0 0 0-4.25-4.25h-8.5zm8.9 1.95a1.15 1.15 0 1 1 0 2.3 1.15 1.15 0 0 1 0-2.3zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 1.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z"/>
             </svg>
-            <span>@crea.valencia</span>
+            <span>@coworkflow</span>
           </div>
           <div class="footer-social-item" aria-label="LinkedIn">
             <svg viewBox="0 0 24 24" role="img" aria-hidden="true">
               <path d="M6.75 8.25a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zM5.5 9.75h2.5V19h-2.5V9.75zM10 9.75h2.4V11h.03c.34-.64 1.17-1.31 2.41-1.31 2.58 0 3.06 1.7 3.06 3.91V19h-2.5v-4.78c0-1.14-.02-2.6-1.58-2.6-1.58 0-1.82 1.23-1.82 2.51V19H10V9.75z"/>
             </svg>
-            <span>Crea Valencia Hub</span>
+            <span>CoWorkFlow</span>
           </div>
           <div class="footer-social-item" aria-label="Facebook">
             <svg viewBox="0 0 24 24" role="img" aria-hidden="true">
@@ -174,11 +176,47 @@
         </div>
       </div>
     </transition>
+
+    <transition name="modal-fade">
+      <div v-if="mostrarModalEliminarCuenta" class="ui-modal-overlay" @click.self="cerrarModalEliminarCuenta">
+        <div class="ui-modal">
+          <h3 class="delete-modal-title">¿Deseas eliminar tu cuenta?</h3>
+          <p>Esta acción es permanente y eliminará todas tus reservas, tours y datos de la plataforma.</p>
+          
+          <div class="delete-confirm-field">
+            <label for="del-pass" class="delete-confirm-label">
+              Introduce tu contraseña para confirmar:
+            </label>
+            <input
+              id="del-pass"
+              type="password"
+              v-model="passwordEliminarCuenta"
+              placeholder="Contraseña"
+              class="delete-confirm-input"
+              @keyup.enter="confirmarEliminarCuenta"
+            />
+            <p v-if="errorEliminarCuenta" class="delete-confirm-error">
+              {{ errorEliminarCuenta }}
+            </p>
+          </div>
+
+          <div class="ui-modal-actions delete-modal-actions">
+            <button class="ui-btn ui-btn-secondary" @click="cerrarModalEliminarCuenta" :disabled="eliminandoCuenta">
+              Cancelar
+            </button>
+            <button class="ui-btn ui-btn-danger" @click="confirmarEliminarCuenta" :disabled="eliminandoCuenta || !passwordEliminarCuenta">
+              {{ eliminandoCuenta ? 'Eliminando...' : 'Eliminar permanentemente' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
 <script>
 import ContactoView from './views/ContactoView.vue';
+import axios from 'axios';
 
 export default {
   name: 'App',
@@ -189,6 +227,10 @@ export default {
     return {
       mostrarModalContacto: false,
       mostrarModalLogout: false,
+      mostrarModalEliminarCuenta: false,
+      passwordEliminarCuenta: '',
+      errorEliminarCuenta: '',
+      eliminandoCuenta: false,
       notificacion: {
         visible: false,
         tipo: 'info',
@@ -291,6 +333,42 @@ export default {
         this.cerrarMenuMovil();
       }
     },
+    abrirModalEliminarCuenta() {
+      this.cerrarMenuPerfil();
+      this.mostrarModalEliminarCuenta = true;
+      this.passwordEliminarCuenta = '';
+      this.errorEliminarCuenta = '';
+    },
+    cerrarModalEliminarCuenta() {
+      this.mostrarModalEliminarCuenta = false;
+      this.passwordEliminarCuenta = '';
+      this.errorEliminarCuenta = '';
+    },
+    async confirmarEliminarCuenta() {
+      if (!this.passwordEliminarCuenta) {
+        this.errorEliminarCuenta = 'Por favor, introduce tu contraseña.';
+        return;
+      }
+      this.eliminandoCuenta = true;
+      this.errorEliminarCuenta = '';
+      try {
+        await axios.post('http://localhost:8000/api/auth/delete-account', {
+          password: this.passwordEliminarCuenta
+        });
+        this.mostrarModalEliminarCuenta = false;
+        this.$store.dispatch('logout');
+        this.$router.push('/login');
+        this.mostrarNotificacion({
+          tipo: 'success',
+          titulo: 'Cuenta eliminada',
+          mensaje: 'Tu cuenta ha sido eliminada correctamente.'
+        });
+      } catch (error) {
+        this.errorEliminarCuenta = error.response?.data?.message || 'Error al eliminar la cuenta.';
+      } finally {
+        this.eliminandoCuenta = false;
+      }
+    },
     abrirModalCerrarSesion() {
       this.cerrarMenuPerfil();
       this.mostrarModalLogout = true;
@@ -310,6 +388,7 @@ export default {
       if (event.key !== 'Escape') return;
       if (this.mostrarModalContacto) this.cerrarModalContacto();
       if (this.mostrarModalLogout) this.mostrarModalLogout = false;
+      if (this.mostrarModalEliminarCuenta) this.cerrarModalEliminarCuenta();
     },
     confirmarCerrarSesion() {
       this.mostrarModalLogout = false;
@@ -711,6 +790,11 @@ body {
   text-shadow: none;
 }
 
+.tour-dropdown,
+.tour-dropdown * {
+  text-shadow: none !important;
+}
+
 .tour-dropdown-label {
   margin: 0 0 0.35rem;
   padding: 0.25rem 0.55rem 0.55rem;
@@ -1046,5 +1130,78 @@ body {
 .profile-fade-leave-to {
   opacity: 0;
   transform: translateY(-4px);
+}
+
+.profile-delete-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  text-decoration: none;
+  color: #9d2030 !important;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  padding: 0.55rem 0.55rem;
+  margin: 0;
+  font-size: 0.93rem;
+  font-weight: 500;
+  text-shadow: none;
+  cursor: pointer;
+}
+
+.profile-delete-btn:hover {
+  background: #fdf2f2;
+}
+
+.ui-btn-danger {
+  background: #9d2030;
+  color: #ffffff;
+}
+
+.ui-btn-danger:hover {
+  background: #7d1a26;
+}
+
+.ui-btn-danger:disabled {
+  background: #e0a3ab;
+  cursor: not-allowed;
+}
+
+.delete-modal-title {
+  color: #9d2030;
+}
+
+.delete-confirm-field {
+  margin-top: 1.25rem;
+}
+
+.delete-confirm-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #2b1b17;
+  margin-bottom: 0.4rem;
+}
+
+.delete-confirm-input {
+  width: 100%;
+  padding: 0.65rem 0.9rem;
+  border: 1px solid #eadfd8;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: #2b1b17;
+  background: #ffffff;
+}
+
+.delete-confirm-error {
+  color: #9d2030;
+  font-size: 0.82rem;
+  margin-top: 0.4rem;
+  font-weight: 500;
+}
+
+.delete-modal-actions {
+  margin-top: 1.5rem;
 }
 </style>

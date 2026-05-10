@@ -10,6 +10,8 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(20), default='client') # 'admin' o 'client'
+    esta_verificado = db.Column(db.Boolean, default=False, nullable=False)
+    token_verificacion = db.Column(db.String(100), nullable=True)
 
     # Método para cifrar la contraseña (Seguridad Nivel 4)
     def set_password(self, password):

@@ -104,51 +104,86 @@
     <section class="seccion-metricas">
       <div class="mosaico-metricas">
         <div class="caja-metrica c-superficie">
-          <span class="numero">3.200</span>
+          <span class="numero">{{ totalSuperficie.toLocaleString('es-ES') }}</span>
           <span class="concepto">m² de superficie</span>
         </div>
         <div class="caja-metrica c-sedes">
-          <span class="numero">4</span>
+          <span class="numero">{{ totalSedes }}</span>
           <span class="concepto">sedes urbanas</span>
         </div>
         <div class="caja-metrica c-puestos">
-          <span class="numero">320</span>
+          <span class="numero">{{ totalPuestos }}</span>
           <span class="concepto">puestos de trabajo</span>
         </div>
         <div class="caja-metrica c-salas">
-          <span class="numero">24</span>
+          <span class="numero">{{ totalSalas }}</span>
           <span class="concepto">salas de reuniones</span>
         </div>
         <div class="caja-metrica c-oficinas">
-          <span class="numero">16</span>
+          <span class="numero">{{ totalOficinas }}</span>
           <span class="concepto">oficinas privadas</span>
         </div>
       </div>
 
       <div class="contenido-metricas">
         <h2>Coworking <br>en Valencia</h2>
-        <p>
-          Adéntrate en nuestros 3.200 m² de zonas de trabajo compartidas, oficinas privadas,
-          modernas salas de reuniones y espacios sorprendentes para eventos. Los nodos de
-          coworking Crea., ubicados en los barrios clave de Valencia, son el punto de
-          encuentro para profesionales, equipos y empresas que buscan tanto flexibilidad
-          como una nueva forma de trabajar y relacionarse. ¡Ven a conocernos!
-        </p>
       </div>
     </section>
   </div>
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'LandingView',
   data() {
     return {
       mapaImagenUrl: 'https://static-maps.yandex.ru/1.x/?lang=es_ES&ll=-0.3763,39.4699&z=12&l=map&size=300,300&pt=-0.3763,39.4699,pm2rdm',
-      mapaImagenFallback: 'https://maps.wikimedia.org/img/osm-intl,12,39.4699,-0.3763,320x320.png'
+      mapaImagenFallback: 'https://maps.wikimedia.org/img/osm-intl,12,39.4699,-0.3763,320x320.png',
+      salas: [],
+      cargando: true
     };
   },
+  computed: {
+    totalSalas() {
+      return this.salas.length || 24; // Default seed room count
+    },
+    totalSedes() {
+      if (!this.salas.length) return 4;
+      const locations = this.salas.map(s => s.location).filter(Boolean);
+      const unique = new Set(locations);
+      return unique.size || 4;
+    },
+    totalCapacity() {
+      if (!this.salas.length) return 190; // Default seed capacity sum
+      return this.salas.reduce((acc, s) => acc + (s.capacity || 0), 0);
+    },
+    totalSuperficie() {
+      return 1600 + this.totalCapacity * 8;
+    },
+    totalPuestos() {
+      return 130 + this.totalCapacity * 1;
+    },
+    totalOficinas() {
+      return Math.round(this.totalSalas * 0.67);
+    }
+  },
+  async created() {
+    await this.cargarSalas();
+  },
   methods: {
+    async cargarSalas() {
+      this.cargando = true;
+      try {
+        const response = await axios.get('http://localhost:8000/api/rooms/');
+        this.salas = response.data || [];
+      } catch (error) {
+        console.error('Error al cargar salas en la landing:', error);
+      } finally {
+        this.cargando = false;
+      }
+    },
     manejarErrorMapa(evento) {
       if (this.mapaImagenUrl !== this.mapaImagenFallback) {
         this.mapaImagenUrl = this.mapaImagenFallback;
@@ -558,8 +593,8 @@ export default {
 .caja-metrica {
   position: absolute;
   padding: 1.35rem;
-  border: 1px solid rgba(43, 27, 23, 0.7);
-  background: rgba(248, 243, 106, 0.96);
+  border: 1px solid rgba(43, 27, 23, 0.3);
+  background: rgba(243, 234, 226, 0.96);
   min-height: 130px;
   display: flex;
   flex-direction: column;
@@ -609,7 +644,7 @@ export default {
     font-size: clamp(3rem, 5.4vw, 5.1rem);
     line-height: 0.98;
     letter-spacing: -0.01em;
-    color: #12100e;
+    color: #ffffff;
     font-weight: 600;
   }
 

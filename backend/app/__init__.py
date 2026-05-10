@@ -300,14 +300,17 @@ def create_app():
     app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
     jwt = JWTManager(app)
 
-    # Configuramos la URI de la base de datos usando variables de entorno
-    # mysql+pymysql://usuario:password@host/nombre_db
-    user = 'root'
-    password = os.getenv('DB_ROOT_PASSWORD')
-    host = 'db'
-    dbname = os.getenv('DB_NAME')
+    # Configuramos la URI de la base de datos usando variables de entorno (soporta Clever Cloud y local)
+    # mysql+pymysql://usuario:password@host:port/nombre_db
+    import urllib.parse
+    user = os.getenv('MYSQL_ADDON_USER', 'root')
+    password = os.getenv('MYSQL_ADDON_PASSWORD', os.getenv('DB_ROOT_PASSWORD', ''))
+    host = os.getenv('MYSQL_ADDON_HOST', 'db')
+    port = os.getenv('MYSQL_ADDON_PORT', '3306')
+    dbname = os.getenv('MYSQL_ADDON_DB', os.getenv('DB_NAME'))
     
-    app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{user}:{password}@{host}/{dbname}"
+    safe_password = urllib.parse.quote_plus(password) if password else ''
+    app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{user}:{safe_password}@{host}:{port}/{dbname}"
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY')
 
@@ -339,6 +342,15 @@ def create_app():
             db.session.commit()
         if 'payment_method' not in booking_columns:
             db.session.execute(db.text("ALTER TABLE bookings ADD COLUMN payment_method VARCHAR(20) DEFAULT 'reception'"))
+            db.session.commit()
+
+        user_columns_result = db.session.execute(db.text("SHOW COLUMNS FROM users"))
+        user_columns = [row[0] for row in user_columns_result]
+        if 'esta_verificado' not in user_columns:
+            db.session.execute(db.text('ALTER TABLE users ADD COLUMN esta_verificado BOOLEAN DEFAULT FALSE'))
+            db.session.commit()
+        if 'token_verificacion' not in user_columns:
+            db.session.execute(db.text('ALTER TABLE users ADD COLUMN token_verificacion VARCHAR(100) NULL'))
             db.session.commit()
 
         seed_sample_rooms()

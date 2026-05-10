@@ -28,6 +28,11 @@ const routes = [
     component: () => import('../views/RegisterView.vue')
   },
   {
+    path: '/verificar-cuenta',
+    name: 'verificar-cuenta',
+    component: () => import('../views/VerificarCuentaView.vue')
+  },
+  {
     path: '/contacto',
     name: 'contacto',
     component: () => import('../views/ContactoView.vue')
