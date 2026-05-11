@@ -35,16 +35,16 @@ services:
         value: "true"
 
   # Servicio para el Frontend (Vue.js como Sitio Estático)
-  - type: web
+  - type: static
     name: coworkflow-frontend
-    runtime: static
     rootDir: frontend
     buildCommand: npm run build
     publishPath: dist
     routes:
       # Regla para soportar el router de Vue (modo history) redireccionando todo a index.html
-      - src: /*
-        dest: /index.html
+      - type: rewrite
+        from: /*
+        to: /index.html
     envVars:
       - key: VUE_APP_API_BASE_URL
         fromService:
