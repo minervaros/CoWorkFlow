@@ -1,0 +1,53 @@
+services:
+  # Servicio para el Backend (Python / Flask)
+  - type: web
+    name: coworkflow-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn run:app
+    envVars:
+      - key: FLASK_SECRET_KEY
+        generateValue: true
+      - key: DB_NAME
+        value: bzwbu0iuthe8g9jhdjl8
+      - key: MYSQL_ADDON_URI
+        value: mysql://urudvjjemjfrawjy:JfAtHo85ocgmpT78N3a5@bzwbu0iuthe8g9jhdjl8-mysql.services.clever-cloud.com:3306/bzwbu0iuthe8g9jhdjl8
+      - key: MYSQL_ADDON_USER
+        value: urudvjjemjfrawjy
+      - key: MYSQL_ADDON_PASSWORD
+        value: JfAtHo85ocgmpT78N3a5
+      - key: MYSQL_ADDON_HOST
+        value: bzwbu0iuthe8g9jhdjl8-mysql.services.clever-cloud.com
+      - key: MYSQL_ADDON_PORT
+        value: "3306"
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        value: minervarosich05@gmail.com
+      - key: SMTP_PASSWORD
+        value: ocydlnomacujawlh
+      - key: SMTP_FROM_EMAIL
+        value: minervarosich05@gmail.com
+      - key: SMTP_USE_TLS
+        value: "true"
+
+  # Servicio para el Frontend (Vue.js como Sitio Estático)
+  - type: web
+    name: coworkflow-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm run build
+    publishPath: dist
+    routes:
+      # Regla para soportar el router de Vue (modo history) redireccionando todo a index.html
+      - src: /*
+        dest: /index.html
+    envVars:
+      - key: VUE_APP_API_BASE_URL
+        fromService:
+          name: coworkflow-backend
+          type: web
+          property: host

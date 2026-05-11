@@ -101,6 +101,11 @@ export function initSessionManager() {
   }
 
   axios.interceptors.request.use(async (config) => {
+    const apiBaseUrl = process.env.VUE_APP_API_BASE_URL;
+    if (apiBaseUrl && config.url && config.url.startsWith('http://localhost:8000')) {
+      config.url = config.url.replace('http://localhost:8000', apiBaseUrl);
+    }
+
     const token = localStorage.getItem('user-token');
     const refreshToken = localStorage.getItem('user-refresh-token');
 
