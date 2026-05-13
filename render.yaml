@@ -2,6 +2,7 @@ services:
   # Servicio para el Backend (Python / Flask)
   - type: web
     name: coworkflow-backend
+    plan: free
     runtime: python
     rootDir: backend
     buildCommand: pip install -r requirements.txt
@@ -37,6 +38,7 @@ services:
   # Servicio para el Frontend (Vue.js como Sitio Estático)
   - type: web
     name: coworkflow-frontend
+    plan: free
     runtime: static
     rootDir: frontend
     buildCommand: npm run build
