@@ -38,7 +38,6 @@ services:
   # Servicio para el Frontend (Vue.js como Sitio Estático)
   - type: web
     name: coworkflow-frontend
-    plan: free
     runtime: static
     rootDir: frontend
     buildCommand: npm run build
