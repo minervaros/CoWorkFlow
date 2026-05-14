@@ -101,14 +101,15 @@ export function initSessionManager() {
   }
 
   axios.interceptors.request.use(async (config) => {
-    let apiBaseUrl = process.env.VUE_APP_API_BASE_URL;
-    if (apiBaseUrl) {
-      if (!apiBaseUrl.startsWith('http://') && !apiBaseUrl.startsWith('https://')) {
-        apiBaseUrl = `https://${apiBaseUrl}`;
-      }
-      if (config.url && config.url.startsWith('http://localhost:8000')) {
-        config.url = config.url.replace('http://localhost:8000', apiBaseUrl);
-      }
+    // Detectamos automáticamente si estamos en desarrollo local o en producción en Render
+    let apiBaseUrl = 'https://coworkflow-backend.onrender.com';
+    
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      apiBaseUrl = 'http://localhost:8000';
+    }
+
+    if (config.url && config.url.startsWith('http://localhost:8000')) {
+      config.url = config.url.replace('http://localhost:8000', apiBaseUrl);
     }
 
     const token = localStorage.getItem('user-token');
