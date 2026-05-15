@@ -261,58 +261,6 @@
             :aria-label="`Ir al grupo ${idx + 1}`"
           ></button>
         </div>
-
-        <!-- Formulario para agregar una reseña -->
-        <div class="formulario-reseña-wrap">
-          <button v-if="!mostrarFormularioReseña" @click="mostrarFormularioReseña = true" class="btn-abrir-formulario">
-            Escribir una opinión
-          </button>
-          
-          <transition name="fade-slide">
-            <form v-if="mostrarFormularioReseña" @submit.prevent="publicarReseña" class="formulario-reseña">
-              <h3>Cuéntanos tu experiencia</h3>
-              <p>Tu opinión ayuda a mejorar la comunidad de CoWorkFlow.</p>
-              
-              <div class="fila-formulario">
-                <div class="campo-formulario">
-                  <label for="autor-reseña">Nombre completo</label>
-                  <input v-model="nuevoAutor" id="autor-reseña" type="text" placeholder="Ej: Sofía Gómez" required />
-                </div>
-                
-                <div class="campo-formulario">
-                  <label for="puesto-reseña">Tu profesión o rol</label>
-                  <input v-model="nuevoPuesto" id="puesto-reseña" type="text" placeholder="Ej: Desarrolladora Frontend" required />
-                </div>
-              </div>
-              
-              <div class="campo-formulario">
-                <label>Tu valoración</label>
-                <div class="selector-estrellas">
-                  <button 
-                    v-for="estrella in 5" 
-                    :key="estrella" 
-                    type="button" 
-                    class="btn-estrella" 
-                    @click="nuevaEstrellas = estrella"
-                    :class="{ activa: estrella <= nuevaEstrellas }"
-                  >
-                    ★
-                  </button>
-                </div>
-              </div>
-              
-              <div class="campo-formulario">
-                <label for="texto-reseña">Opinión</label>
-                <textarea v-model="nuevoTexto" id="texto-reseña" rows="4" placeholder="Escribe aquí tu experiencia en CoWorkFlow..." required></textarea>
-              </div>
-              
-              <div class="acciones-formulario">
-                <button type="submit" class="btn-publicar">Publicar reseña</button>
-                <button type="button" @click="cancelarFormulario" class="btn-cancelar">Cancelar</button>
-              </div>
-            </form>
-          </transition>
-        </div>
       </div>
     </section>
 
@@ -338,11 +286,6 @@ export default {
       esMovil: false,
       filtrosMovilAbierto: false,
       slideActual: 0,
-      mostrarFormularioReseña: false,
-      nuevoAutor: '',
-      nuevoPuesto: '',
-      nuevoTexto: '',
-      nuevaEstrellas: 5,
       opiniones: [
         { id: 1, autor: "Laura Gómez", puesto: "Diseñadora Freelance", texto: "El café de especialidad y la luz natural del Cabanyal cambiaron por completo mi rutina de trabajo. ¡Un 10!", estrellas: 5 },
         { id: 2, autor: "Carlos Mendoza", puesto: "Tech Lead en Koa", texto: "Espacios modernos, excelente conexión a internet y cabinas privadas para llamadas sin interrupciones. Muy recomendado.", estrellas: 5 },
@@ -364,19 +307,6 @@ export default {
     window.removeEventListener('resize', this.actualizarModoMovil);
   },
   async created() {
-    // Cargar reseñas guardadas en LocalStorage
-    const reviewsGuardadas = localStorage.getItem('user-opiniones');
-    if (reviewsGuardadas) {
-      try {
-        const parsed = JSON.parse(reviewsGuardadas);
-        if (Array.isArray(parsed)) {
-          this.opiniones = [...this.opiniones, ...parsed];
-        }
-      } catch (e) {
-        console.error("Error loading local reviews:", e);
-      }
-    }
-
     // Al cargar la página, pedimos las salas al backend
     try {
       const response = await axios.get('http://localhost:8000/api/rooms/');
@@ -528,41 +458,6 @@ export default {
     },
     irASlide(idx) {
       this.slideActual = idx;
-    },
-    publicarReseña() {
-      if (!this.nuevoAutor.trim() || !this.nuevoPuesto.trim() || !this.nuevoTexto.trim()) {
-        return;
-      }
-
-      const nuevaOpinion = {
-        id: Date.now(),
-        autor: this.nuevoAutor.trim(),
-        puesto: this.nuevoPuesto.trim(),
-        texto: this.nuevoTexto.trim(),
-        estrellas: this.nuevaEstrellas
-      };
-
-      this.opiniones.push(nuevaOpinion);
-
-      // Guardar en LocalStorage
-      const personalizadas = JSON.parse(localStorage.getItem('user-opiniones') || '[]');
-      personalizadas.push(nuevaOpinion);
-      localStorage.setItem('user-opiniones', JSON.stringify(personalizadas));
-
-      // Limpiar formulario y cerrar
-      this.cancelarFormulario();
-
-      // Mover el carrusel al último slide para mostrar la nueva reseña
-      this.$nextTick(() => {
-        this.slideActual = this.gruposOpiniones.length - 1;
-      });
-    },
-    cancelarFormulario() {
-      this.nuevoAutor = '';
-      this.nuevoPuesto = '';
-      this.nuevoTexto = '';
-      this.nuevaEstrellas = 5;
-      this.mostrarFormularioReseña = false;
     }
   },
   computed: {
@@ -1607,183 +1502,6 @@ export default {
 .indicador.activo {
   background: #5a3f33;
   transform: scale(1.2);
-}
-
-/* --- FORMULARIO DE RESEÑAS --- */
-.formulario-reseña-wrap {
-  margin-top: 3rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.btn-abrir-formulario {
-  padding: 0.8rem 2.2rem;
-  background: transparent;
-  color: #fff;
-  border: 1.5px solid rgba(255, 255, 255, 0.7);
-  border-radius: 999px;
-  font-weight: 600;
-  font-size: 0.95rem;
-  cursor: pointer;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  transition: all 0.25s ease;
-  backdrop-filter: blur(4px);
-  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-}
-
-.btn-abrir-formulario:hover {
-  background: #ffffff;
-  color: #2b1b17;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-  text-shadow: none;
-}
-
-.formulario-reseña {
-  width: 100%;
-  max-width: 640px;
-  background: rgba(253, 248, 244, 0.98);
-  border: 1px solid #eaddd3;
-  border-radius: 20px;
-  padding: 2.5rem;
-  text-align: left;
-  box-shadow: 0 20px 46px rgba(43, 27, 23, 0.15);
-  margin-top: 1.5rem;
-}
-
-.formulario-reseña h3 {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.65rem;
-  color: #2b1b17;
-  margin: 0 0 0.5rem;
-}
-
-.formulario-reseña > p {
-  color: #6e5e58;
-  font-size: 0.92rem;
-  margin: 0 0 2rem;
-}
-
-.fila-formulario {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.25rem;
-  margin-bottom: 1.25rem;
-}
-
-@media (max-width: 640px) {
-  .fila-formulario {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-}
-
-.campo-formulario {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 1.25rem;
-}
-
-.campo-formulario label {
-  font-weight: 600;
-  color: #2b1b17;
-  font-size: 0.9rem;
-}
-
-.campo-formulario input,
-.campo-formulario textarea {
-  width: 100%;
-  padding: 0.8rem 1rem;
-  border: 1px solid #e2d7cf;
-  border-radius: 10px;
-  font-size: 0.95rem;
-  background: #ffffff;
-  color: #2b1b17;
-  font-family: inherit;
-  transition: border-color 0.25s, box-shadow 0.25s;
-}
-
-.campo-formulario input:focus,
-.campo-formulario textarea:focus {
-  outline: none;
-  border-color: #1b4fd6;
-  box-shadow: 0 0 0 3px rgba(27, 79, 214, 0.14);
-}
-
-.selector-estrellas {
-  display: flex;
-  gap: 0.4rem;
-}
-
-.btn-estrella {
-  background: transparent;
-  border: none;
-  font-size: 1.8rem;
-  color: #d1c0b5;
-  cursor: pointer;
-  padding: 0;
-  transition: color 0.2s, transform 0.1s;
-}
-
-.btn-estrella.activa {
-  color: #d48c3f;
-}
-
-.btn-estrella:hover {
-  transform: scale(1.15);
-}
-
-.acciones-formulario {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-
-.btn-publicar {
-  padding: 0.85rem 2rem;
-  background-color: #362521;
-  color: white;
-  border: none;
-  border-radius: 999px;
-  font-weight: 700;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: background-color 0.25s, transform 0.2s;
-}
-
-.btn-publicar:hover {
-  background-color: #4a3530;
-  transform: translateY(-1px);
-}
-
-.btn-cancelar {
-  padding: 0.85rem 2rem;
-  background-color: transparent;
-  color: #6e5e58;
-  border: 1px solid #c8b2a6;
-  border-radius: 999px;
-  font-weight: 600;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: all 0.25s ease;
-}
-
-.btn-cancelar:hover {
-  background-color: #f5ede7;
-  color: #2b1b17;
-}
-
-.fade-slide-enter-active,
-.fade-slide-leave-active {
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.fade-slide-enter-from,
-.fade-slide-leave-to {
-  opacity: 0;
-  transform: translateY(12px);
 }
 
 </style>
