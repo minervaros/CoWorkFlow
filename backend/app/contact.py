@@ -46,17 +46,6 @@ def send_contact_email():
     if len(asunto) > 180 or len(mensaje) > 5000:
         return jsonify({'message': 'El asunto o mensaje es demasiado largo.'}), 400
 
-    smtp_cfg = _get_smtp_config()
-    if not smtp_cfg['host'] or not smtp_cfg['user'] or not smtp_cfg['password'] or not smtp_cfg['from_email']:
-        return jsonify({
-            'message': 'El servicio de correo no está configurado. Define SMTP_HOST, SMTP_USER, SMTP_PASSWORD y SMTP_FROM_EMAIL.'
-        }), 503
-
-    correo = EmailMessage()
-    correo['Subject'] = f"Hemos recibido tu solicitud: {asunto}"
-    correo['From'] = smtp_cfg['from_email']
-    correo['To'] = email
-
     body = (
         f"Hola {nombre},\n\n"
         "Gracias por contactar con CoWorkFlow.\n"
@@ -67,6 +56,52 @@ def send_contact_email():
         "Un saludo,\n"
         "Equipo CoWorkFlow"
     )
+
+    resend_key = os.getenv('RESEND_API_KEY', '').strip()
+    if resend_key:
+        try:
+            import urllib.request
+            import json
+            url = "https://api.resend.com/emails"
+            headers = {
+                "Authorization": f"Bearer {resend_key}",
+                "Content-Type": "application/json"
+            }
+            remitente = os.getenv('SMTP_FROM_EMAIL', 'onboarding@resend.dev').strip()
+            if not remitente or 'gmail.com' in remitente or 'onboarding@resend.dev' in remitente:
+                remitente = 'onboarding@resend.dev'
+
+            payload = {
+                "from": f"CoWorkFlow <{remitente}>",
+                "to": [email],
+                "subject": f"Hemos recibido tu solicitud: {asunto}",
+                "text": body
+            }
+            req = urllib.request.Request(
+                url,
+                data=json.dumps(payload).encode('utf-8'),
+                headers=headers,
+                method='POST'
+            )
+            with urllib.request.urlopen(req, timeout=10) as response:
+                response.read()
+
+            return jsonify({'message': 'Correo enviado correctamente al usuario.'}), 200
+        except Exception as error:
+            print(f"Error en Resend API: {str(error)}")
+            return jsonify({'message': f'No se pudo enviar el correo vía Resend API: {str(error)}'}), 500
+
+    # Fallback SMTP convencional
+    smtp_cfg = _get_smtp_config()
+    if not smtp_cfg['host'] or not smtp_cfg['user'] or not smtp_cfg['password'] or not smtp_cfg['from_email']:
+        return jsonify({
+            'message': 'El servicio de correo no está configurado. Define SMTP_HOST, SMTP_USER, SMTP_PASSWORD y SMTP_FROM_EMAIL.'
+        }), 503
+
+    correo = EmailMessage()
+    correo['Subject'] = f"Hemos recibido tu solicitud: {asunto}"
+    correo['From'] = smtp_cfg['from_email']
+    correo['To'] = email
     correo.set_content(body)
 
     try:

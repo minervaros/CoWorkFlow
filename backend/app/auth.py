@@ -28,18 +28,9 @@ def _obtener_config_smtp():
     }
 
 def enviar_correo_verificacion(destinatario, nombre_completo, token):
-    smtp_cfg = _obtener_config_smtp()
-    if not smtp_cfg['host'] or not smtp_cfg['usuario'] or not smtp_cfg['contrasena'] or not smtp_cfg['remitente']:
-        print(f"SMTP no configurado. Token para {destinatario}: {token}")
-        return False, "Servicio de correo no configurado"
-
+    resend_key = os.getenv('RESEND_API_KEY', '').strip()
     url_frontal = os.getenv('FRONTEND_URL', 'http://localhost:8080').rstrip('/')
     enlace = f"{url_frontal}/verificar-cuenta?token={token}"
-
-    correo = EmailMessage()
-    correo['Subject'] = "Verifica tu cuenta en CoWorkFlow"
-    correo['From'] = smtp_cfg['remitente']
-    correo['To'] = destinatario
 
     cuerpo = (
         f"Hola {nombre_completo},\n\n"
@@ -50,6 +41,50 @@ def enviar_correo_verificacion(destinatario, nombre_completo, token):
         "Un saludo,\n"
         "El equipo de CoWorkFlow"
     )
+
+    if resend_key:
+        try:
+            import urllib.request
+            import json
+            url = "https://api.resend.com/emails"
+            headers = {
+                "Authorization": f"Bearer {resend_key}",
+                "Content-Type": "application/json"
+            }
+            # Resend gratuito requiere enviar desde 'onboarding@resend.dev' si no hay dominio verificado
+            remitente = os.getenv('SMTP_FROM_EMAIL', 'onboarding@resend.dev').strip()
+            if not remitente or 'gmail.com' in remitente or 'onboarding@resend.dev' in remitente:
+                remitente = 'onboarding@resend.dev'
+
+            payload = {
+                "from": f"CoWorkFlow <{remitente}>",
+                "to": [destinatario],
+                "subject": "Verifica tu cuenta en CoWorkFlow",
+                "text": cuerpo
+            }
+            req = urllib.request.Request(
+                url,
+                data=json.dumps(payload).encode('utf-8'),
+                headers=headers,
+                method='POST'
+            )
+            with urllib.request.urlopen(req, timeout=10) as response:
+                response.read()
+            return True, None
+        except Exception as e:
+            print(f"Error en Resend API: {str(e)}")
+            return False, f"Error en Resend API: {str(e)}"
+
+    # Fallback SMTP convencional
+    smtp_cfg = _obtener_config_smtp()
+    if not smtp_cfg['host'] or not smtp_cfg['usuario'] or not smtp_cfg['contrasena'] or not smtp_cfg['remitente']:
+        print(f"SMTP no configurado. Token para {destinatario}: {token}")
+        return False, "Servicio de correo no configurado"
+
+    correo = EmailMessage()
+    correo['Subject'] = "Verifica tu cuenta en CoWorkFlow"
+    correo['From'] = smtp_cfg['remitente']
+    correo['To'] = destinatario
     correo.set_content(cuerpo)
 
     try:
