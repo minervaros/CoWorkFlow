@@ -57,25 +57,32 @@ def send_contact_email():
         "Equipo CoWorkFlow"
     )
 
-    resend_key = os.getenv('RESEND_API_KEY', '').strip()
-    if resend_key:
+    brevo_key = os.getenv('BREVO_API_KEY', '').strip()
+    if brevo_key:
         try:
             import urllib.request
             import json
-            url = "https://api.resend.com/emails"
+            url = "https://api.brevo.com/v3/smtp/email"
             headers = {
-                "Authorization": f"Bearer {resend_key}",
-                "Content-Type": "application/json"
+                "accept": "application/json",
+                "api-key": brevo_key,
+                "content-type": "application/json"
             }
-            remitente = os.getenv('SMTP_FROM_EMAIL', 'onboarding@resend.dev').strip()
-            if not remitente or 'gmail.com' in remitente or 'onboarding@resend.dev' in remitente:
-                remitente = 'onboarding@resend.dev'
+            remitente = os.getenv('SMTP_FROM_EMAIL', 'minervarosich05@gmail.com').strip()
 
             payload = {
-                "from": f"CoWorkFlow <{remitente}>",
-                "to": [email],
+                "sender": {
+                    "name": "CoWorkFlow Soporte",
+                    "email": remitente
+                },
+                "to": [
+                    {
+                        "email": email,
+                        "name": nombre
+                    }
+                ],
                 "subject": f"Hemos recibido tu solicitud: {asunto}",
-                "text": body
+                "textContent": body
             }
             req = urllib.request.Request(
                 url,
@@ -88,8 +95,8 @@ def send_contact_email():
 
             return jsonify({'message': 'Correo enviado correctamente al usuario.'}), 200
         except Exception as error:
-            print(f"Error en Resend API: {str(error)}")
-            return jsonify({'message': f'No se pudo enviar el correo vía Resend API: {str(error)}'}), 500
+            print(f"Error en Brevo API: {str(error)}")
+            return jsonify({'message': f'No se pudo enviar el correo vía Brevo API: {str(error)}'}), 500
 
     # Fallback SMTP convencional
     smtp_cfg = _get_smtp_config()

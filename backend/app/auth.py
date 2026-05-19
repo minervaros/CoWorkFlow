@@ -28,7 +28,7 @@ def _obtener_config_smtp():
     }
 
 def enviar_correo_verificacion(destinatario, nombre_completo, token):
-    resend_key = os.getenv('RESEND_API_KEY', '').strip()
+    brevo_key = os.getenv('BREVO_API_KEY', '').strip()
     url_frontal = os.getenv('FRONTEND_URL', 'http://localhost:8080').rstrip('/')
     enlace = f"{url_frontal}/verificar-cuenta?token={token}"
 
@@ -42,25 +42,31 @@ def enviar_correo_verificacion(destinatario, nombre_completo, token):
         "El equipo de CoWorkFlow"
     )
 
-    if resend_key:
+    if brevo_key:
         try:
             import urllib.request
             import json
-            url = "https://api.resend.com/emails"
+            url = "https://api.brevo.com/v3/smtp/email"
             headers = {
-                "Authorization": f"Bearer {resend_key}",
-                "Content-Type": "application/json"
+                "accept": "application/json",
+                "api-key": brevo_key,
+                "content-type": "application/json"
             }
-            # Resend gratuito requiere enviar desde 'onboarding@resend.dev' si no hay dominio verificado
-            remitente = os.getenv('SMTP_FROM_EMAIL', 'onboarding@resend.dev').strip()
-            if not remitente or 'gmail.com' in remitente or 'onboarding@resend.dev' in remitente:
-                remitente = 'onboarding@resend.dev'
+            remitente = os.getenv('SMTP_FROM_EMAIL', 'minervarosich05@gmail.com').strip()
 
             payload = {
-                "from": f"CoWorkFlow <{remitente}>",
-                "to": [destinatario],
+                "sender": {
+                    "name": "CoWorkFlow",
+                    "email": remitente
+                },
+                "to": [
+                    {
+                        "email": destinatario,
+                        "name": nombre_completo
+                    }
+                ],
                 "subject": "Verifica tu cuenta en CoWorkFlow",
-                "text": cuerpo
+                "textContent": cuerpo
             }
             req = urllib.request.Request(
                 url,
@@ -72,8 +78,8 @@ def enviar_correo_verificacion(destinatario, nombre_completo, token):
                 response.read()
             return True, None
         except Exception as e:
-            print(f"Error en Resend API: {str(e)}")
-            return False, f"Error en Resend API: {str(e)}"
+            print(f"Error en Brevo API: {str(e)}")
+            return False, f"Error en Brevo API: {str(e)}"
 
     # Fallback SMTP convencional
     smtp_cfg = _obtener_config_smtp()
