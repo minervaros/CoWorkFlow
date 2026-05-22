@@ -134,11 +134,12 @@
             <div class="metodo-pago-opciones">
               <button
                 type="button"
-                :class="['metodo-btn', { activo: metodoPago === 'plataforma' }]"
-                @click="metodoPago = 'plataforma'"
+                class="metodo-btn deshabilitado"
+                disabled
+                style="opacity: 0.5; cursor: not-allowed;"
               >
                 <span class="titulo">Pagar en la plataforma</span>
-                <span class="detalle">Pago seguro online y confirmación inmediata</span>
+                <span class="detalle">Disponible  proximamente</span>
               </button>
 
               <button
@@ -233,7 +234,7 @@ export default {
       // Pase diario
       fechaDiario: '',
       cantidadDias: '',
-      metodoPago: 'plataforma',
+      metodoPago: 'recepcion',
       cargando: false,
       procesandoPago: false,
       mostrarModalPago: false,
