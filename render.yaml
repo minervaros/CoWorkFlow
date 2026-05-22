@@ -13,11 +13,11 @@ services:
       - key: DB_NAME
         value: bzwbu0iuthe8g9jhdjl8
       - key: MYSQL_ADDON_URI
-        value: mysql://urudvjjemjfrawjy:JfAtHo85ocgmpT78N3a5@bzwbu0iuthe8g9jhdjl8-mysql.services.clever-cloud.com:3306/bzwbu0iuthe8g9jhdjl8
+        sync: false
       - key: MYSQL_ADDON_USER
         value: urudvjjemjfrawjy
       - key: MYSQL_ADDON_PASSWORD
-        value: JfAtHo85ocgmpT78N3a5
+        sync: false
       - key: MYSQL_ADDON_HOST
         value: bzwbu0iuthe8g9jhdjl8-mysql.services.clever-cloud.com
       - key: MYSQL_ADDON_PORT
@@ -29,11 +29,13 @@ services:
       - key: SMTP_USER
         value: minervarosich05@gmail.com
       - key: SMTP_PASSWORD
-        value: ocydlnomacujawlh
+        sync: false
       - key: SMTP_FROM_EMAIL
         value: minervarosich05@gmail.com
       - key: SMTP_USE_TLS
         value: "true"
+      - key: BREVO_API_KEY
+        sync: false
 
   # Servicio para el Frontend (Vue.js como Sitio Estático)
   - type: web

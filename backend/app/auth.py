@@ -1,34 +1,15 @@
 import os
 import secrets
-import smtplib
-from email.message import EmailMessage
 from flask import Blueprint, request, jsonify
 from app import db
 from app.models import User
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity, get_jwt
+from app.mailer import send_email
 
 # Creamos el Blueprint para autenticación
 auth_bp = Blueprint('auth', __name__)
 
-def _obtener_config_smtp():
-    host = os.getenv('SMTP_HOST', '').strip()
-    port = int(os.getenv('SMTP_PORT', '587'))
-    usuario = os.getenv('SMTP_USER', '').strip()
-    contrasena = os.getenv('SMTP_PASSWORD', '').strip()
-    remitente = os.getenv('SMTP_FROM_EMAIL', usuario).strip()
-    usar_tls = os.getenv('SMTP_USE_TLS', 'true').strip().lower() in ('1', 'true', 'yes', 'on')
-
-    return {
-        'host': host,
-        'port': port,
-        'usuario': usuario,
-        'contrasena': contrasena,
-        'remitente': remitente,
-        'usar_tls': usar_tls
-    }
-
 def enviar_correo_verificacion(destinatario, nombre_completo, token):
-    brevo_key = os.getenv('BREVO_API_KEY', '').strip()
     url_frontal = os.getenv('FRONTEND_URL', 'http://localhost:8080').rstrip('/')
     enlace = f"{url_frontal}/verificar-cuenta?token={token}"
 
@@ -42,66 +23,13 @@ def enviar_correo_verificacion(destinatario, nombre_completo, token):
         "El equipo de CoWorkFlow"
     )
 
-    if brevo_key:
-        try:
-            import urllib.request
-            import json
-            url = "https://api.brevo.com/v3/smtp/email"
-            headers = {
-                "accept": "application/json",
-                "api-key": brevo_key,
-                "content-type": "application/json"
-            }
-            remitente = os.getenv('SMTP_FROM_EMAIL', 'minervarosich05@gmail.com').strip()
-
-            payload = {
-                "sender": {
-                    "name": "CoWorkFlow",
-                    "email": remitente
-                },
-                "to": [
-                    {
-                        "email": destinatario,
-                        "name": nombre_completo
-                    }
-                ],
-                "subject": "Verifica tu cuenta en CoWorkFlow",
-                "textContent": cuerpo
-            }
-            req = urllib.request.Request(
-                url,
-                data=json.dumps(payload).encode('utf-8'),
-                headers=headers,
-                method='POST'
-            )
-            with urllib.request.urlopen(req, timeout=10) as response:
-                response.read()
-            return True, None
-        except Exception as e:
-            print(f"Error en Brevo API: {str(e)}")
-            return False, f"Error en Brevo API: {str(e)}"
-
-    # Fallback SMTP convencional
-    smtp_cfg = _obtener_config_smtp()
-    if not smtp_cfg['host'] or not smtp_cfg['usuario'] or not smtp_cfg['contrasena'] or not smtp_cfg['remitente']:
-        print(f"SMTP no configurado. Token para {destinatario}: {token}")
-        return False, "Servicio de correo no configurado"
-
-    correo = EmailMessage()
-    correo['Subject'] = "Verifica tu cuenta en CoWorkFlow"
-    correo['From'] = smtp_cfg['remitente']
-    correo['To'] = destinatario
-    correo.set_content(cuerpo)
-
-    try:
-        with smtplib.SMTP(smtp_cfg['host'], smtp_cfg['port'], timeout=15) as servidor:
-            if smtp_cfg['usar_tls']:
-                servidor.starttls()
-            servidor.login(smtp_cfg['usuario'], smtp_cfg['contrasena'])
-            servidor.send_message(correo)
-        return True, None
-    except Exception as e:
-        return False, str(e)
+    return send_email(
+        to_email=destinatario,
+        to_name=nombre_completo,
+        subject="Verifica tu cuenta en CoWorkFlow",
+        body=cuerpo,
+        sender_name="CoWorkFlow"
+    )
 
 @auth_bp.route('/register', methods=['POST'])
 def register():

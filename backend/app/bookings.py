@@ -6,8 +6,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import or_
 import os
 import re
-import smtplib
-from email.message import EmailMessage
+from app.mailer import send_email
 
 bookings_bp = Blueprint('bookings', __name__)
 
@@ -21,34 +20,8 @@ SEDE_LOCATION_HINTS = {
 EMAIL_REGEX = re.compile(r'^[^\s@]+@[^\s@]+\.[^\s@]+$')
 
 
-def _get_smtp_config():
-    host = os.getenv('SMTP_HOST', '').strip()
-    port = int(os.getenv('SMTP_PORT', '587'))
-    user = os.getenv('SMTP_USER', '').strip()
-    password = os.getenv('SMTP_PASSWORD', '').strip()
-    from_email = os.getenv('SMTP_FROM_EMAIL', user).strip()
-    use_tls = os.getenv('SMTP_USE_TLS', 'true').strip().lower() in ('1', 'true', 'yes', 'on')
-
-    return {
-        'host': host,
-        'port': port,
-        'user': user,
-        'password': password,
-        'from_email': from_email,
-        'use_tls': use_tls
-    }
-
-
 def send_tour_confirmation_email(to_email, full_name, sede_name, fecha, hora, people_count, company_name):
-    smtp_cfg = _get_smtp_config()
-    if not smtp_cfg['host'] or not smtp_cfg['user'] or not smtp_cfg['password'] or not smtp_cfg['from_email']:
-        return False, 'El servicio de correo no está configurado en el servidor.'
-
-    correo = EmailMessage()
-    correo['Subject'] = f"Confirmación de tour en {sede_name}"
-    correo['From'] = smtp_cfg['from_email']
-    correo['To'] = to_email
-    correo.set_content(
+    cuerpo = (
         f"Hola {full_name},\n\n"
         "Tu solicitud de tour se ha registrado correctamente con estos datos:\n"
         f"- Sede: {sede_name}\n"
@@ -59,36 +32,23 @@ def send_tour_confirmation_email(to_email, full_name, sede_name, fecha, hora, pe
         "Nos pondremos en contacto contigo para confirmar los detalles.\n\n"
         "Equipo CoWorkFlow"
     )
-
-    try:
-        with smtplib.SMTP(smtp_cfg['host'], smtp_cfg['port'], timeout=20) as server:
-            if smtp_cfg['use_tls']:
-                server.starttls()
-            server.login(smtp_cfg['user'], smtp_cfg['password'])
-            server.send_message(correo)
-        return True, None
-    except Exception as error:
-        return False, str(error)
+    return send_email(
+        to_email=to_email,
+        to_name=full_name,
+        subject=f"Confirmación de tour en {sede_name}",
+        body=cuerpo,
+        sender_name="CoWorkFlow"
+    )
 
 
 def send_room_booking_confirmation_email(to_email, full_name, room_name, start_dt, end_dt, total_price, payment_status, payment_method):
-    smtp_cfg = _get_smtp_config()
-    if not smtp_cfg['host'] or not smtp_cfg['user'] or not smtp_cfg['password'] or not smtp_cfg['from_email']:
-        return False, 'El servicio de correo no está configurado en el servidor.'
-
     fecha = start_dt.strftime('%Y-%m-%d')
     hora_inicio = start_dt.strftime('%H:%M')
     hora_fin = end_dt.strftime('%H:%M')
-
-    correo = EmailMessage()
-    correo['Subject'] = f"Confirmación de reserva - {room_name}"
-    correo['From'] = smtp_cfg['from_email']
-    correo['To'] = to_email
-
     metodo_txt = 'Plataforma online' if payment_method == 'platform' else 'Recepción'
     estado_txt = 'Pagada' if payment_status == 'paid' else 'Pendiente'
 
-    correo.set_content(
+    cuerpo = (
         f"Hola {full_name},\n\n"
         "Tu reserva de sala se ha registrado correctamente:\n"
         f"- Sala: {room_name}\n"
@@ -101,16 +61,13 @@ def send_room_booking_confirmation_email(to_email, full_name, room_name, start_d
         "Gracias por confiar en CoWorkFlow.\n\n"
         "Equipo CoWorkFlow"
     )
-
-    try:
-        with smtplib.SMTP(smtp_cfg['host'], smtp_cfg['port'], timeout=20) as server:
-            if smtp_cfg['use_tls']:
-                server.starttls()
-            server.login(smtp_cfg['user'], smtp_cfg['password'])
-            server.send_message(correo)
-        return True, None
-    except Exception as error:
-        return False, str(error)
+    return send_email(
+        to_email=to_email,
+        to_name=full_name,
+        subject=f"Confirmación de reserva - {room_name}",
+        body=cuerpo,
+        sender_name="CoWorkFlow"
+    )
 
 
 def find_tour_conflict(sede_slug, start, end):
