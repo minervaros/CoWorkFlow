@@ -40,7 +40,7 @@ services:
         fromService:
           name: coworkflow-frontend
           type: web
-          property: host
+          property: url
 
   # Servicio para el Frontend (Vue.js como Sitio Estático)
   - type: web
@@ -59,4 +59,4 @@ services:
         fromService:
           name: coworkflow-backend
           type: web
-          property: host
+          property: url
