@@ -37,10 +37,7 @@ services:
       - key: BREVO_API_KEY
         sync: false
       - key: FRONTEND_URL
-        fromService:
-          name: coworkflow-frontend
-          type: web
-          property: url
+        sync: false
 
   # Servicio para el Frontend (Vue.js como Sitio Estático)
   - type: web
