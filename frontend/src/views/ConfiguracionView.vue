@@ -1,5 +1,6 @@
 <template>
   <div class="config-view">
+    <div class="home-velo"></div>
     <section class="config-card">
       <h1>Configuración</h1>
       <p class="sub">Ajustes básicos de tu cuenta para esta aplicación.</p>
@@ -172,6 +173,13 @@ export default {
   align-items: flex-start;
   justify-content: center;
   padding: 7rem 1rem 2rem;
+  position: relative;
+  z-index: 2;
+}
+
+.config-view > *:not(.home-velo) {
+  position: relative;
+  z-index: 2;
 }
 
 .config-card {
@@ -291,5 +299,16 @@ export default {
 
 .modal-title {
   color: #2b1b17;
+}
+
+.home-velo {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.25);
+  z-index: 1;
+  pointer-events: none;
 }
 </style>

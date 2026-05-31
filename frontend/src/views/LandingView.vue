@@ -21,7 +21,7 @@
 
       <main class="landing-main">
         <section class="hero-content">
-          <h1>Encuentra tu Espacio <em>Crea.</em><br>en Valencia.</h1>
+          <h1>Encuentra tu Espacio <em>CoworkFlow.</em><br>en Valencia.</h1>
           <p>
             Descubre nodos urbanos de coworking de alta gama. 
             Desconecta, trabaja y reconecta en nuestros espacios premium distribuidos en Ruzafa, El Carmen, Eixample y El Cabanyal.
@@ -199,13 +199,13 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-/* --- CONFIGURACIÓN BASE DE CONTENEDOR INMERSIVO --- */
+
 .landing-page {
   background: transparent;
   min-height: 100vh;
   width: 100%;
   max-width: 100%;
-  color: #2b1b17; /* Tipografía en tono café oscuro premium */
+  color: #2b1b17;
   overflow: visible;
   overflow-x: hidden;
   position: relative;
@@ -214,7 +214,7 @@ export default {
 
 .hero-stage {
   position: relative;
-  height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -222,7 +222,7 @@ export default {
   overflow: hidden;
 }
 
-/* --- EL MARCO BLANCO CON DESTELLO INTERACTIVO --- */
+/* --- EL MARCO BLANCO  --- */
 .hero-stage::after {
   content: "";
   position: absolute;
@@ -238,7 +238,7 @@ export default {
 
 
 
-/* --- HÉROE CENTRAL EDITORIAL --- */
+/* --- hero --- */
 .landing-main {
   max-width: 1200px;
   width: 100%;
@@ -307,7 +307,7 @@ export default {
   }
 }
 
-/* --- CÁPSULAS FLOTANTES (GLASSMORPHISM PREMIUM) --- */
+/* --- CÁPSULAS FLOTANTES  --- */
 .capsula-flotante {
   position: absolute;
   z-index: 6;
@@ -576,11 +576,13 @@ export default {
   background: transparent;
   padding: 5rem 1.6rem 6rem;
   display: grid;
-  grid-template-columns: minmax(540px, 1.05fr) minmax(0, 1fr);
-  gap: 3rem;
+  grid-template-columns: minmax(340px, 1fr) minmax(320px, 1fr);
+  justify-content: center;
   align-items: center;
+  gap: 18rem;
+  max-width: 1300px;
+  margin: 0 auto;
   position: relative;
-  isolation: isolate;
   overflow: hidden;
 }
 
@@ -588,6 +590,9 @@ export default {
   position: relative;
   height: 560px;
   max-width: 560px;
+  display: block;
+  margin: 0;
+  
 }
 
 .caja-metrica {
@@ -637,6 +642,7 @@ export default {
 .contenido-metricas {
   max-width: 640px;
   align-self: center;
+  text-align: center;
 
   h2 {
     margin: 0;
@@ -684,7 +690,7 @@ export default {
 /* --- RESPONSIVE / ADAPTACIÓN DE INTERFAZ --- */
 @media (max-width: 900px) {
   .hero-content h1 { font-size: 3.2rem; }
-  .capsula-flotante { display: none; } /* Limpieza visual en tablets */
+  .capsula-flotante { display: none; }
   .mapa-flotante-wrap { bottom: 8%; }
 
   .opciones-grid {
@@ -692,32 +698,44 @@ export default {
   }
 
   .seccion-metricas {
-    grid-template-columns: 1fr;
-    padding: 4rem 1.1rem 5rem;
+    display: flex;
+    flex-direction: column;
+    padding: 4rem 1.25rem;
+    gap: 3rem;
   }
 
+  
   .mosaico-metricas {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, 1fr); 
     gap: 1rem;
-    height: auto;
+    width: 100%;
+    height: auto; 
     max-width: 100%;
+    margin: 0 auto;
   }
 
+  /* 2. CAMBIADO: Forzamos a que las cajas olviden sus coordenadas 'top' y 'left' fijas */
   .caja-metrica {
     position: relative;
-    inset: auto;
-    width: 100%;
-    height: 130px;
-    min-height: 130px;
-    box-shadow: none;
+    inset: auto !important;
+    width: 100% !important; 
+    height: auto !important;
+    min-height: 120px;
+    padding: 1.5rem 1rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(43, 27, 23, 0.04);
 
     &:hover {
       transform: none;
-      box-shadow: none;
+      box-shadow: 0 4px 12px rgba(43, 27, 23, 0.04);
     }
   }
 
+  
+  .c-superficie {
+    grid-column: span 2; 
+  }
   .contenido-metricas {
     max-width: 100%;
 
@@ -732,14 +750,72 @@ export default {
 }
 
 @media (max-width: 768px) {
+
+  .hero-stage {
+    height: auto !important;     
+    min-height: 100dvh;          
+    padding-top: 8rem;           
+    padding-bottom: 4rem;        
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; 
+  }
+
+ 
+  .hero-content h1 {
+    font-size: 2.4rem !important; 
+    line-height: 1.2;
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 0 1rem;          
+  }
+
+  
+  .hero-content p {
+    font-size: 1rem !important;
+    line-height: 1.5;
+    padding: 0 1rem;
+    margin-bottom: 2rem;
+  }
+
+  
   .hero-stage::after {
-    top: 36px; left: 36px; right: 36px; bottom: 36px;
-    border-width: 3px;
-    border-radius: 24px;
+    display: none; /* La opción más limpia en móviles  */
+  }
+
+  .hero-stage::after {
+    top: 16px;
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    border-width: 2px;
+    border-radius: 20px;
   }
   .destello-interfaz { display: none; }
   .hero-content h1 { font-size: 2.5rem; }
   .hero-content p { font-size: 1.05rem; }
+
+.mapa-flotante-wrap {
+    position: relative;     
+    bottom: auto;           
+    left: auto;             
+    transform: none;       
+    margin: 2.5rem auto 0;  
+    display: flex;
+    justify-content: center;
+    width: 100%;            
+    opacity: 1;           
+  }
+
+ 
+  .mapa-circular {
+    width: 120px;           
+    height: 120px;
+    opacity: 1;            
+    animation: none;      
+    border: 3px solid #ffffff;
+    box-shadow: 0 8px 20px rgba(43, 27, 23, 0.12);
+  }
 
   .opciones-grid {
     grid-template-columns: 1fr;

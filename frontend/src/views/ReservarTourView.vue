@@ -1,5 +1,6 @@
 <template>
   <div class="reservar-tour-view">
+    <div class="home-velo"></div>
     <div class="tour-wrap">
       <div class="tour-card">
         <aside class="tour-panel">
@@ -15,6 +16,7 @@
         </aside>
 
         <form class="tour-form" @submit.prevent="enviarFormulario">
+          <div class="tour-titulo-movil">Reservar Tour <span v-if="nombreSedeSeleccionada">- {{ nombreSedeSeleccionada }}</span></div>
           <div class="campo">
             <label for="tour-nombre">Nombre completo</label>
             <input id="tour-nombre" v-model.trim="form.nombreCompleto" type="text" placeholder="Ej: Nombre Apellido" required maxlength="120" />
@@ -219,6 +221,13 @@ export default {
   min-height: 100vh;
   padding: 7.5rem 1.25rem 2rem;
   background: transparent;
+  position: relative;
+  z-index: 2;
+}
+
+.reservar-tour-view > *:not(.home-velo) {
+  position: relative;
+  z-index: 2;
 }
 
 .tour-wrap {
@@ -235,6 +244,7 @@ export default {
   box-shadow: 0 20px 46px rgba(43, 27, 23, 0.12);
   text-shadow: none;
 }
+
 
 .tour-panel {
   background: linear-gradient(180deg, #f4ebe3 0%, #e9ded4 100%);
@@ -413,17 +423,70 @@ export default {
   .tour-card {
     grid-template-columns: 1fr;
   }
-
   .tour-panel {
-    padding: 1.5rem;
+    display: none !important;
   }
-
-  .tour-form {
-    padding: 1.25rem;
+  .tour-titulo-movil {
+    display: block;
   }
-
   .campo-duo {
     grid-template-columns: 1fr;
   }
+}
+@media (max-width: 600px) {
+  .tour-form {
+    padding: 1.1rem 0.7rem 4.5rem 0.7rem;
+    max-width: 99vw;
+    min-height: 100vh;
+    box-sizing: border-box;
+    overflow-y: auto;
+  }
+  .campo input {
+    padding: 0.7rem 0.7rem;
+    font-size: 1.08rem;
+    max-width: 340px;
+    width: 92%;
+    margin: 0 auto;
+    display: block;
+  }
+  .campo label {
+    max-width: 340px;
+    width: 92%;
+    margin: 0 auto 0.25rem auto;
+    display: block;
+    text-align: left;
+  }
+  .reservar-tour-view{
+    padding-top: 2rem;
+  }
+}
+// Título pequeño solo para móvil
+.tour-titulo-movil {
+  display: none;
+  text-align: center;
+  font-size: 1.18rem;
+  color: #6d534d;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-bottom: 1.9rem;
+  margin-top: -0.2rem;
+  padding-top: 20px;
+}
+@media (max-width: 860px) {
+  .tour-titulo-movil {
+    display: block;
+  }
+}
+
+
+.home-velo {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.25);
+  z-index: 1;
+  pointer-events: none;
 }
 </style>

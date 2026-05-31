@@ -1,9 +1,9 @@
 <template>
   <div class="favoritos-view">
+    <div class="home-velo"></div>
     <div class="favoritos-wrap">
       <header class="favoritos-header">
         <h1>Tus salas favoritas</h1>
-        <p>Consulta rápido las salas que guardaste para volver a reservarlas cuando quieras.</p>
       </header>
 
       <div v-if="cargando" class="estado">Cargando favoritos...</div>
@@ -132,8 +132,14 @@ export default {
 <style lang="scss" scoped>
 .favoritos-view {
   min-height: 100vh;
-  padding: 7rem 1.5rem 2.5rem;
-  background: linear-gradient(180deg, #fbf7f4 0%, #f6f0eb 100%);
+  padding: 2rem 1.5rem 2.5rem;
+  position: relative;
+  z-index: 2;
+}
+
+.favoritos-view > *:not(.home-velo) {
+  position: relative;
+  z-index: 2;
 }
 
 .favoritos-wrap {
@@ -142,20 +148,41 @@ export default {
 }
 
 .favoritos-header {
-  margin-bottom: 1.4rem;
+  margin-bottom: 3.4rem;
   text-align: center;
 }
 
 .favoritos-header h1 {
-  color: #2b1b17;
-  text-shadow: none;
+  color: #ffffff;
+  text-shadow: 0 8px 38px rgba(0,0,0,2.95);
+  font-family: 'Playfair Display', serif;
   margin: 0;
+  font-size: 3.5rem;
+  font-weight: 400;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2em;
 }
+
+.favoritos-header h1::before,
+.favoritos-header h1::after {
+  content: '';
+  flex: 1 1 60px;
+  height: 2px;
+  background: linear-gradient(90deg, #fff 60%, #c7a67d 100%);
+  opacity: 0.7;
+  max-width: 120px;
+}
+
 
 .favoritos-header p {
   margin: 0.45rem 0 0;
-  color: #6e5e58;
-  text-shadow: none;
+  color: #ffffff;
+  text-shadow: 0 8px 48px rgba(0,0,0,1.95);
+  font-size: 1.5rem;
+  font-weight: 500;
 }
 
 .estado {
@@ -299,5 +326,16 @@ export default {
   .acciones {
     flex-direction: column;
   }
+}
+
+.home-velo {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.25);
+  z-index: 1;
+  pointer-events: none;
 }
 </style>

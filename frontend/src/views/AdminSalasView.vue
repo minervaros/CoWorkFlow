@@ -1,5 +1,6 @@
 <template>
   <div class="admin-salas">
+    <div class="home-velo"></div>
     <div class="header-panel">
       <div>
         <h1>Control de Salas</h1>
@@ -25,6 +26,76 @@
         <span>Precio promedio</span>
         <strong>{{ precioPromedio }}€/h</strong>
       </article>
+    </div>
+
+    <div v-if="mostrarModal" class="modal-overlay">
+      <div class="modal">
+        <h2>{{ editando ? 'Editar Sala' : 'Nueva Sala' }}</h2>
+        <form @submit.prevent="guardarSala" class="form-sala-layout">
+          <div class="form-col-main">
+            <div class="grupo-form">
+              <label>Nombre de la sala</label>
+              <input v-model.trim="form.name" placeholder="Ej: Sala Ágora" required />
+            </div>
+
+            <div class="grupo-form">
+              <label>Sede</label>
+              <select v-model="form.location" required>
+                <option disabled value="">Selecciona una sede</option>
+                <option v-for="sede in sedesDisponibles" :key="sede" :value="sede">{{ sede }}</option>
+              </select>
+              <small class="helper-text">Esta sede se usa en catálogo, detalle y reservas.</small>
+            </div>
+
+            <div class="grupo-form grupo-cols">
+              <div>
+                <label>Capacidad</label>
+                <input v-model.number="form.capacity" type="number" min="1" step="1" placeholder="Ej: 8" required />
+              </div>
+              <div>
+                <label>Precio por hora (€)</label>
+                <input v-model.number="form.price_per_hour" type="number" min="1" step="0.01" placeholder="Ej: 24" required />
+              </div>
+            </div>
+
+            <div class="grupo-form">
+              <label>Descripción</label>
+              <textarea v-model.trim="form.description" placeholder="Describe la sala, usos recomendados y ambiente"></textarea>
+            </div>
+
+            <div class="grupo-form">
+              <label>URL de imagen</label>
+              <input v-model.trim="form.image_url" type="url" placeholder="https://..." />
+            </div>
+
+            <div class="grupo-form estado-switch">
+              <label>
+                <input v-model="form.is_active" type="checkbox" />
+                Sala activa y visible para reservas
+              </label>
+            </div>
+          </div>
+
+          <div class="form-col-side">
+            <div class="grupo-form grupo-equipacion">
+              <label>🧰 Equipación</label>
+              <div class="equipamiento-grid">
+                <label v-for="opcion in opcionesEquipamientoDisponibles" :key="opcion" class="equipamiento-opcion">
+                  <input v-model="form.equipamiento" type="checkbox" :value="opcion" />
+                  <span>{{ opcion }}</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <p v-if="errorFormulario" class="form-error">{{ errorFormulario }}</p>
+
+          <div class="modal-btns">
+            <button type="button" @click="mostrarModal = false">Cancelar</button>
+            <button type="submit" class="btn-save">Guardar Cambios</button>
+          </div>
+        </form>
+      </div>
     </div>
 
     <div class="filtros">
@@ -129,75 +200,7 @@
       </div>
     </div>
 
-    <div v-if="mostrarModal" class="modal-overlay">
-      <div class="modal">
-        <h2>{{ editando ? 'Editar Sala' : 'Nueva Sala' }}</h2>
-        <form @submit.prevent="guardarSala" class="form-sala-layout">
-          <div class="form-col-main">
-            <div class="grupo-form">
-              <label>Nombre de la sala</label>
-              <input v-model.trim="form.name" placeholder="Ej: Sala Ágora" required />
-            </div>
-
-            <div class="grupo-form">
-              <label>Sede</label>
-              <select v-model="form.location" required>
-                <option disabled value="">Selecciona una sede</option>
-                <option v-for="sede in sedesDisponibles" :key="sede" :value="sede">{{ sede }}</option>
-              </select>
-              <small class="helper-text">Esta sede se usa en catálogo, detalle y reservas.</small>
-            </div>
-
-            <div class="grupo-form grupo-cols">
-              <div>
-                <label>Capacidad</label>
-                <input v-model.number="form.capacity" type="number" min="1" step="1" placeholder="Ej: 8" required />
-              </div>
-              <div>
-                <label>Precio por hora (€)</label>
-                <input v-model.number="form.price_per_hour" type="number" min="1" step="0.01" placeholder="Ej: 24" required />
-              </div>
-            </div>
-
-            <div class="grupo-form">
-              <label>Descripción</label>
-              <textarea v-model.trim="form.description" placeholder="Describe la sala, usos recomendados y ambiente"></textarea>
-            </div>
-
-            <div class="grupo-form">
-              <label>URL de imagen</label>
-              <input v-model.trim="form.image_url" type="url" placeholder="https://..." />
-            </div>
-
-            <div class="grupo-form estado-switch">
-              <label>
-                <input v-model="form.is_active" type="checkbox" />
-                Sala activa y visible para reservas
-              </label>
-            </div>
-          </div>
-
-          <div class="form-col-side">
-            <div class="grupo-form grupo-equipacion">
-              <label>🧰 Equipación</label>
-              <div class="equipamiento-grid">
-                <label v-for="opcion in opcionesEquipamientoDisponibles" :key="opcion" class="equipamiento-opcion">
-                  <input v-model="form.equipamiento" type="checkbox" :value="opcion" />
-                  <span>{{ opcion }}</span>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <p v-if="errorFormulario" class="form-error">{{ errorFormulario }}</p>
-
-          <div class="modal-btns">
-            <button type="button" @click="mostrarModal = false">Cancelar</button>
-            <button type="submit" class="btn-save">Guardar Cambios</button>
-          </div>
-        </form>
-      </div>
-    </div>
+    
   </div>
 </template>
 
@@ -425,6 +428,13 @@ export default {
   max-width: 1300px;
   margin: 0 auto;
   color: #f7f3ef;
+  position: relative;
+  z-index: 2;
+}
+
+.admin-salas > *:not(.home-velo) {
+  position: relative;
+  z-index: 2;
 }
 
 .header-panel {
@@ -438,6 +448,36 @@ export default {
 .header-panel h1 {
   margin: 0;
   font-size: 2rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 600px) {
+  .header-panel h1 {
+    font-size: 1.15rem;
+  }
+  .header-panel {
+    flex-direction: column;
+    align-items: flex-start; 
+    gap: 1.25rem;           
+    margin-bottom: 2rem;     
+  }
+
+ 
+  .header-panel p {
+    font-size: 0.95rem;
+    line-height: 1.45;       
+    max-width: 280px;       
+    color: #eadfd7;
+  }
+
+  
+  .btn-nuevo {
+    width: 100%;           
+    padding: 0.85rem 1.2rem; 
+    text-align: center;
+  }
 }
 
 .header-panel p {
@@ -663,15 +703,15 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle at 20% 20%, rgba(255, 180, 120, 0.12), rgba(0, 0, 0, 0.72));
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 50;
+  padding: 50px 0;
 }
 
 .modal {
-  background: linear-gradient(180deg, #fffcf9 0%, #f9f2ec 100%);
+  background: linear-gradient(180deg, #fffefd 0%, #fffbf7 100%);
   color: #2f221d;
   padding: 1.35rem;
   border-radius: 20px;
@@ -888,6 +928,35 @@ export default {
 
   .equipamiento-grid {
     max-height: 240px;
+  }
+}
+
+.home-velo {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(255, 255, 255, 0.25);
+  z-index: 1;
+  pointer-events: none;
+}
+
+
+@media (max-width: 600px) {
+  .kpi-grid {
+    
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem; 
+  }
+
+  .kpi-card {
+   
+    padding: 0.8rem; 
+  }
+
+  .kpi-card strong {
+    font-size: 1.15rem; 
   }
 }
 </style>

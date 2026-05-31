@@ -1,5 +1,6 @@
 <template>
   <div class="detalle-sala">
+    <div class="home-velo"></div>
     <div class="detalle-wrap">
       <div v-if="cargando" class="estado">Cargando sala...</div>
 
@@ -81,9 +82,7 @@
 
             <div ref="mapContainer" class="mapa-leaflet" aria-label="Mapa de la sala"></div>
 
-            <p class="mapa-note">
-              El pin usa coordenadas reales de referencia en Valencia para simular la sede de la sala.
-            </p>
+           
           </section>
 
           <section class="ubicacion-card">
@@ -293,12 +292,18 @@ export default {
 <style lang="scss" scoped>
 .detalle-sala {
   min-height: 100vh;
-  padding: 8rem 1.5rem 3rem;
-  background: linear-gradient(180deg, #fbf7f4 0%, #f6f0eb 100%);
+  padding: 5rem 1.5rem 3rem;
+  position: relative;
+  z-index: 2;
+}
+
+.detalle-sala > *:not(.home-velo) {
+  position: relative;
+  z-index: 2;
 }
 
 .detalle-wrap {
-  max-width: 1280px;
+  max-width: 1080px;
   margin: 0 auto;
 }
 
@@ -629,5 +634,16 @@ h1 {
   .mapa-leaflet {
     height: 280px;
   }
+}
+
+.home-velo {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.25);
+  z-index: 1;
+  pointer-events: none;
 }
 </style>

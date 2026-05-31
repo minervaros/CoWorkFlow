@@ -1,10 +1,10 @@
 <template>
   <div class="login-container">
+    <div class="home-velo"></div>
     <div class="auth-card">
       <aside class="auth-panel">
         <div class="auth-panel-content">
           <p class="auth-kicker">CoWorkFlow</p>
-          <h2>Bienvenido de vuelta</h2>
         </div>
         <img :src="require('@/assets/cowork-illustration.png')" alt="Equipo en coworking" class="auth-illustration" />
       </aside>
@@ -106,6 +106,35 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
+
+@media (max-width: 860px) {
+  .auth-card {
+    grid-template-columns: 1fr;
+  }
+  .auth-panel {
+    display: none !important;
+  }
+  .login-titulo-movil {
+    display: block;
+  }
+}
+@media (max-width: 600px) {
+  .formulario-login {
+    padding: 1.1rem 0.7rem;
+    max-width: 99vw;
+    max-height: 98vh;
+    min-height: 520px;
+    overflow-y: visible;
+  }
+  .form-group input {
+    padding: 0.7rem 0.7rem;
+    font-size: 1.08rem;
+  }
+  .btn-login{
+    margin-top: 30px;
+  }
+}
 $color-primario: #362521;
 $color-acento: #1b4fd6;
 $color-oscuro: #2b1b17;
@@ -117,6 +146,13 @@ $color-error: #b42318;
   align-items: center;
   min-height: calc(100vh - 120px);
   padding: 2rem 1.25rem;
+  position: relative;
+  z-index: 2;
+}
+
+.login-container > *:not(.home-velo) {
+  position: relative;
+  z-index: 2;
 }
 
 .auth-card {
@@ -152,15 +188,6 @@ $color-error: #b42318;
     margin: 0 0 0.6rem;
     font-weight: 700;
   }
-
-  h2 {
-    margin: 0;
-    color: white;
-    font-size: 2rem;
-    line-height: 1.12;
-    text-shadow: 0 2px 15px rgba(1, 1, 0, 2.85);
-  }
-
 
   .auth-illustration {
     position: absolute;
@@ -269,5 +296,16 @@ $color-error: #b42318;
   .auth-panel {
     padding: 1.5rem;
   }
+}
+
+.home-velo {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.25);
+  z-index: 1;
+  pointer-events: none;
 }
 </style>

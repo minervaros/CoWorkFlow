@@ -1,5 +1,6 @@
 <template>
   <div class="admin-container">
+    <div class="home-velo"></div>
     <header class="dashboard-header">
       <h1>Panel de control</h1>
       
@@ -287,6 +288,13 @@ export default {
   min-height: 100vh;
   padding: 2rem 4rem 4rem 4rem;
   font-family: 'Inter', sans-serif;
+  position: relative;
+  z-index: 2;
+}
+
+.admin-container > *:not(.home-velo) {
+  position: relative;
+  z-index: 2;
 }
 
 /* --- ENCABEZADO EDITORIAL --- */
@@ -303,6 +311,13 @@ h1 {
   letter-spacing: -0.02em;
 }
 
+@media (max-width: 600px) {
+  .dashboard-header h1 {
+    font-size: 1.35rem;
+    font-weight: 600;
+  }
+}
+
 /* --- FILTROS DE PERIODO --- */
 .admin-filters {
   display: flex;
@@ -315,6 +330,27 @@ h1 {
   font-weight: 500;
   color: #ffffff;
 }
+
+@media (max-width: 600px) {
+  .admin-filters label {
+    font-size: 1rem;
+  }
+  .admin-filters select {
+    font-size: 0.82rem !important;
+    padding: 0.22rem 0.5rem;
+    min-width: 110px;
+    height: 2.1rem;
+    line-height: 1.1;
+  }
+  /* Opciones del dropdown más pequeñas */
+  ::v-deep .admin-filters select option {
+    font-size: 1.2rem;
+  }
+  
+}
+
+  
+
 .admin-filters select {
   padding: 0.5rem 1rem;
   border-radius: 20px;
@@ -565,4 +601,109 @@ h1 {
     padding: 0.9rem 1rem;
   }
 }
+
+.home-velo {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.25);
+  z-index: 1;
+  pointer-events: none;
+}
+
+
+/* --- TRANSFORMACIÓN RESPONSIVA DE LA TABLA (Breakpoint Móvil) --- */
+@media (max-width: 768px) {
+  
+  /* 1. Forzamos a la tabla y sus componentes a actuar como bloques apilables */
+  .tabla-admin, 
+  .tabla-admin tbody, 
+  .tabla-admin tr, 
+  .tabla-admin td {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+ 
+  .tabla-admin tyrannical-header,
+  .tabla-admin thead {
+    display: none;
+  }
+
+  
+  .tabla-admin tr {
+    background: #ffffff;
+    border-bottom: 1px solid #eaddd3;
+    padding: 1.25rem 1rem;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem; 
+  }
+
+
+  .tabla-admin td {
+    border-bottom: none !important;
+    padding: 0.25rem 0 !important;
+    font-size: 0.92rem;
+    display: flex;
+    justify-content: space-between; 
+    align-items: center;
+    text-align: right;
+  }
+
+
+  
+
+  .reserva-id {
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    order: -2; /* Sube el ID arriba del todo */
+  }
+
+
+  .tabla-admin td:has(.badge-status) {
+    order: -1;
+    margin-top: -1.8rem; /* Lo posiciona en paralelo con la línea del ID */
+    margin-bottom: 0.5rem;
+  }
+
+
+  .price-cell {
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-top: 1px solid #f6efe9;
+    padding-top: 0.75rem !important;
+    margin-top: 0.25rem;
+  }
+
+  .tabla-admin td:has(.btn-delete, .text-muted) {
+    border-top: 1px solid #f6efe9;
+    padding-top: 0.75rem !important;
+    justify-content: flex-end; 
+  }
+
+  /* 5. Inyectamos las etiquetas descriptivas mediante selectores posicionales (:nth-child) */
+  .tabla-admin td:nth-child(2)::before { content: "👤 Usuario"; }
+  .tabla-admin td:nth-child(3)::before { content: "🚪 Sala"; }
+  .tabla-admin td:nth-child(4)::before { content: "📅 Fecha / Hora"; }
+  .tabla-admin td:nth-child(5)::before { content: "💶 Total"; }
+  .tabla-admin td:nth-child(6)::before { content: "📌 Estado"; }
+
+  .tabla-admin td::before {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    color: #8c7e7a;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+    text-align: left;
+    flex-shrink: 0;
+  }
+}
+
+
 </style>

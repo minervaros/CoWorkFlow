@@ -1,5 +1,6 @@
 <template>
   <div class="contenedor-reservas">
+    <div class="home-velo"></div>
     <div class="tarjeta-reserva">
       <aside class="reserva-panel">
         <p class="reserva-kicker">Reserva inteligente</p>
@@ -514,7 +515,15 @@ export default {
   justify-content: center;
   min-height: calc(100vh - 120px);
   padding: 2rem 1.25rem;
+  position: relative;
+  z-index: 2;
 }
+
+.contenedor-reservas > *:not(.home-velo) {
+  position: relative;
+  z-index: 2;
+}
+
 
 .tarjeta-reserva {
   display: grid;
@@ -915,5 +924,16 @@ h2 {
   .modal-acciones {
     flex-direction: column;
   }
+}
+/* Velo oscuro global como en HomeView */
+.home-velo {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.55);
+  z-index: 1;
+  pointer-events: none;
 }
 </style>

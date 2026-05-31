@@ -1,5 +1,6 @@
 <template>
   <div class="mis-reservas-container">
+    <div class="home-velo"></div>
     <h1>Mis Reservas</h1>
     <p class="descripcion">Aquí puedes consultar y gestionar tus próximos espacios.</p>
 
@@ -173,6 +174,16 @@ export default {
   max-width: 1200px;
   margin: 0 auto;
   color: #fcfaf7;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 2;
+}
+
+.mis-reservas-container > *:not(.home-velo) {
+  position: relative;
+  z-index: 2;
 }
 
 .mis-reservas-container h1 {
@@ -369,5 +380,16 @@ export default {
   background: #fdecee;
   color: #a73745;
   border: 1px solid #f6c7cf;
+}
+/* Velo oscuro global como en HomeView */
+.home-velo {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.25);
+  z-index: 1;
+  pointer-events: none;
 }
 </style>

@@ -1,5 +1,6 @@
 <template>
   <div class="contenedor-verificacion">
+    <div class="home-velo"></div>
     <div class="tarjeta-verificacion">
       <!-- Icono animado o ilustrativo superior -->
       <div class="header-icono" :class="estado">
@@ -87,15 +88,20 @@ $color-acento: #1b4fd6;
 $color-oscuro: #2b1b17;
 $color-exito: #2e7d32;
 $color-error: #c62828;
-$color-fondo: #fbf8f5;
 
 .contenedor-verificacion {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: calc(100vh - 120px);
-  background-color: $color-fondo;
   padding: 2rem 1.25rem;
+  position: relative;
+  z-index: 2;
+}
+
+.contenedor-verificacion > *:not(.home-velo) {
+  position: relative;
+  z-index: 2;
 }
 
 .tarjeta-verificacion {
@@ -201,5 +207,16 @@ h2 {
     transform: scale(1);
     opacity: 1;
   }
+}
+
+.home-velo {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.25);
+  z-index: 1;
+  pointer-events: none;
 }
 </style>

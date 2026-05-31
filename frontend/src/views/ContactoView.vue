@@ -12,6 +12,7 @@
         </aside>
 
         <form class="contacto-form" @submit.prevent="enviarFormulario">
+            <div class="contacto-titulo-movil">Contacto</div>
           <div class="campo">
             <label for="nombre">Nombre</label>
             <input id="nombre" v-model.trim="form.nombre" type="text" placeholder="Ej: Nombre Apellido" required maxlength="120" />
@@ -103,11 +104,27 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+// Título pequeño solo para móvil
+.contacto-titulo-movil {
+  display: none;
+  text-align: center;
+  font-size: 1.08rem;
+  color: #6d534d;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.7rem;
+}
+
+@media (max-width: 860px) {
+  .contacto-titulo-movil {
+    display: block;
+  }
+}
 
 
 .contacto-card {
   display: grid;
-  grid-template-columns: minmax(260px, 0.92fr) minmax(340px, 1fr);
+  grid-template-columns: minmax(120px, 0.5fr) minmax(340px, 1fr);
   border-radius: 24px;
   overflow: hidden;
   border: 1px solid #d6bca9;
@@ -123,7 +140,8 @@ export default {
   justify-content: flex-start;
   align-items: flex-start;
   overflow: hidden;
-  min-height: 360px;
+  min-height: 120px;
+  padding: 0.7rem 0.7rem 0.7rem 0.7rem;
 
   &::after {
     content: '';
@@ -186,15 +204,15 @@ export default {
 
 .contacto-form {
   background: #fff6ee;
-  padding: 1.7rem;
+  padding: 2.2rem 1.2rem;
   text-shadow: none;
 }
 
 .campo {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-  margin-bottom: 0.85rem;
+  gap: 0.7rem;
+  margin-bottom: 1.3rem;
 }
 
 .campo label {
@@ -269,14 +287,28 @@ export default {
 @media (max-width: 860px) {
   .contacto-card {
     grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
   }
-
   .contacto-panel {
-    padding: 1.5rem;
+    display: none !important;
   }
-
+}
+@media (max-width: 600px) {
   .contacto-form {
-    padding: 1.25rem;
+    padding: 1.1rem 0.7rem;
+    max-width: 99vw;
+    max-height: 98vh;
+    min-height: 520px;
+    overflow-y: visible;
+  }
+  .campo input,
+  .campo textarea {
+    padding: 0.7rem 0.7rem;
+    font-size: 1.08rem;
+  }
+  .campo textarea {
+    min-height: 70px;
+    max-height: 180px;
   }
 }
 </style>

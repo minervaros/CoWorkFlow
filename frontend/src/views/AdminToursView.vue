@@ -1,5 +1,6 @@
 <template>
   <div class="admin-tours-container">
+    <div class="home-velo"></div>
     <header class="header">
       <h1>Reservas de tours</h1>
       <p>Consulta todas las solicitudes de tour registradas.</p>
@@ -105,6 +106,13 @@ export default {
   min-height: 100vh;
   padding: 2rem 3rem 3rem;
   color: #fff;
+  position: relative;
+  z-index: 2;
+}
+
+.admin-tours-container > *:not(.home-velo) {
+  position: relative;
+  z-index: 2;
 }
 
 .header h1 {
@@ -202,5 +210,16 @@ export default {
   .tabla-tours {
     min-width: 960px;
   }
+}
+
+.home-velo {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.25);
+  z-index: 1;
+  pointer-events: none;
 }
 </style>

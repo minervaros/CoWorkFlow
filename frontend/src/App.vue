@@ -27,7 +27,6 @@
 
       <div v-else :class="['nav-links', { 'is-open': mostrarMenuMovil }]">
         <router-link to="/" @click="cerrarMenuMovil">Inicio</router-link>
-        <router-link :to="{ path: '/', hash: '#servicios' }" @click="cerrarMenuMovil">Servicios</router-link>
         <router-link to="/salas" @click="cerrarMenuMovil">Catálogo</router-link>
         <button type="button" class="nav-link-btn" @click="abrirModalContacto">Contacto</button>
 
@@ -483,7 +482,7 @@ body {
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
 }
 
-/* --- TARJETAS ESTILO GALERÍA DE ARTE --- */
+
 .stat-card, .dashboard-visual, .tabla-contenedor {
   text-shadow: none !important;
   background: #ffffff !important;
@@ -502,6 +501,8 @@ body {
   font-size: 1.1rem;
   background: transparent;
   color: #fcfaf7;
+  position: relative;
+  z-index: 100;
 
   a,
   .nav-link-btn {
@@ -849,10 +850,12 @@ body {
 .site-footer {
   margin-top: 2.2rem;
   border-top: 1px solid rgba(255, 255, 255, 0.28);
-  background: rgba(255, 255, 255, 0.42);
+  background: rgba(255, 255, 255, 0.74);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   text-shadow: none;
+  position: relative;
+  z-index: 100;
 }
 
 .site-footer-inner {
@@ -953,7 +956,25 @@ body {
     width: 100%;
   }
 
-  .tour-dropdown,
+  .tour-dropdown {
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: 100% !important;
+    transform: none !important;
+    margin-top: 0.2rem;
+    width: 100% !important;
+    min-width: 0 !important;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 8px 24px rgba(30, 20, 16, 0.10);
+    z-index: 100;
+    display: block !important;
+    margin-left: 0 !important;
+    max-width: 100vw;
+  }
+  .tour-menu {
+    position: relative;
+  }
   .profile-dropdown {
     position: static;
     transform: none;

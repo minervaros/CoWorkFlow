@@ -1,5 +1,6 @@
 <template>
   <div class="perfil-view">
+    <div class="home-velo"></div>
     <section class="perfil-card">
       <h1>Mi perfil</h1>
       <p class="sub">Aquí puedes ver la información básica de tu cuenta.</p>
@@ -55,6 +56,13 @@ export default {
   align-items: flex-start;
   justify-content: center;
   padding: 7rem 1rem 2rem;
+  position: relative;
+  z-index: 2;
+}
+
+.perfil-view > *:not(.home-velo) {
+  position: relative;
+  z-index: 2;
 }
 
 .perfil-card {
@@ -106,5 +114,16 @@ export default {
   text-decoration: none;
   padding: 0.65rem 1rem;
   border-radius: 10px;
+}
+/* Velo oscuro global como en HomeView */
+.home-velo {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.55);
+  z-index: 1;
+  pointer-events: none;
 }
 </style>

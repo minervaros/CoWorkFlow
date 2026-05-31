@@ -1,5 +1,6 @@
 <template>
   <div class="home">
+    <div class="home-velo"></div>
     <header class="hero">
       <h1>Catálogo de Salas para Equipos que <em>Avanzan</em></h1>
     </header>
@@ -685,22 +686,40 @@ export default {
   flex-direction: column;
   overflow-x: hidden;
   overflow-y: auto;
+  position: relative;
+  z-index: 2;
+}
+
+.home > *:not(.home-velo) {
+  position: relative;
+  z-index: 2;
+}
+
+.home-velo {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.25);
+  z-index: 1;
+  pointer-events: none;
 }
 
 .hero {
   background: transparent;
   color: #2b1b17;
   text-shadow: none;
-  padding: 5.25rem 2rem 1.8rem;
+  padding: 3.25rem 2rem 1.8rem;
   text-align: center;
   flex-shrink: 0;
 }
 
   .hero h1 {
     font-family: 'Playfair Display', serif;
-    font-size: clamp(2.35rem, 5vw, 4.5rem);
+    font-size: 3.5rem;
     font-weight: 400;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.02rem;
     margin: 0 auto;
     margin-bottom: 30px;
     line-height: 1.2;
@@ -708,21 +727,33 @@ export default {
     width: fit-content;
     color: #fff;
     text-shadow: 0 8px 48px rgba(0,0,0,0.95), 0 2px 8px #000, 0 1px 0 #000;
-    border: 2.5px solid #fff;
-    border-radius: 1.8em;
+
     padding: 0.25em 1.2em;
-    display: inline-block;
-    background: rgba(0,0,0,0.10);
-    box-shadow: 0 2px 16px 0 rgba(0,0,0,0.18);
+
+
+    display: inline-flex;
+    align-items: center;    
+    gap: 1.5rem;
   }
 
+.hero h1::before,
 .hero h1::after {
   content: '';
+ 
   display: block;
-  width: min(380px, 72vw);
-  height: 1px;
-  margin: 1rem auto 0;
-  background: linear-gradient(90deg, rgba(122, 90, 74, 0.06), rgba(122, 90, 74, 0.55), rgba(122, 90, 74, 0.06));
+  width: 280px;            
+  height: 2px;
+  opacity: 0.7;
+}
+
+
+.hero h1::before {
+  background: linear-gradient(90deg, rgba(199, 166, 125, 0) 0%, #fff 100%);
+}
+
+
+.hero h1::after {
+  background: linear-gradient(90deg, #fff 0%, rgba(199, 166, 125, 0) 100%);
 }
 
 .hero h1 em {
@@ -763,7 +794,7 @@ export default {
 
   .intro-sedes h2 {
   font-family: 'Playfair Display', serif;
-  font-size: clamp(1.9rem, 2.7vw, 2.85rem);
+  font-size: 2.5rem;
   line-height: 1.22;
   margin: 0;
     color: #fff;
@@ -807,15 +838,15 @@ export default {
   column-gap: 3.2rem;
   row-gap: 2.65rem;
   margin: 4rem auto 0;
-  max-width: 1380px;
+  max-width: 1180px;
 }
 
 .tarjeta-barrio {
   position: relative;
   border-radius: 12px;
-  min-height: 220px;
+  min-height: 120px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  border: 20px solid rgba(255, 255, 255, 0.28);
   box-shadow: 0 10px 24px rgba(18, 10, 7, 0.22);
   cursor: pointer;
   transition: transform 0.28s ease, box-shadow 0.28s ease;
@@ -827,6 +858,7 @@ export default {
 
   &:hover .barrio-imagen {
     transform: scale(1.08);
+    border-radius: 12px;
   }
 
   &:hover .btn-barrio,
@@ -940,7 +972,7 @@ export default {
   .titulo-catalogo-sede {
     margin: 0 0 1.15rem;
     font-family: 'Playfair Display', serif;
-    font-size: clamp(1.65rem, 2.3vw, 2.4rem);
+    font-size: 2rem;
     font-weight: 600;
     color: #fff;
     letter-spacing: -0.01em;
@@ -1396,11 +1428,26 @@ export default {
 
 @media (max-width: 640px) {
   .hero {
-    padding-top: 4.5rem;
+    padding-top: 1.5rem;
+    padding-left: 1rem;  
+    padding-right: 1rem;
   }
 
   .hero h1 {
-    font-size: 2.35rem;
+    font-size: 2.2rem;  
+    letter-spacing: -0.01rem;
+    padding: 0.25em 0;  
+    
+    
+    display: block; 
+    width: 100%;
+    text-align: center;
+
+    
+    &::before,
+    &::after {
+      display: none !important;
+    }
   }
 
   .intro-sedes h2 {
@@ -1416,7 +1463,6 @@ export default {
     grid-template-columns: 1fr;
   }
 }
-
 @media (max-width: 900px) {
   .intro-descripcion {
     max-width: 100%;

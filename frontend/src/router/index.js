@@ -5,12 +5,12 @@ const routes = [
   {
     path: '/',
     name: 'landing',
-    component: () => import('../views/LandingView.vue') // <-- Tu nueva portada estilo Torik
+    component: () => import('../views/LandingView.vue') 
   },
   {
     path: '/salas',
     name: 'catalogo',
-    component: () => import('../views/HomeView.vue') // <-- Tu antigua Home con el buscador y las tarjetas
+    component: () => import('../views/HomeView.vue') 
   },
   {
     path: '/salas/:id',
